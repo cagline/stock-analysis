@@ -9,6 +9,8 @@ export type Order = {
   orderTime: string;
   orderDateTime: string;
   exchangeOrderId: string;
+  /** Execution Id from CSV – unique per fill, used for dedup/merge */
+  executionId?: string;
   filledQty: number;
   remainingQty: number;
   orderStatus: string;

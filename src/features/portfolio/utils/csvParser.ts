@@ -39,6 +39,7 @@ export function parseOrderTrackerCSV(csvText: string): Order[] {
   const filledQtyIndex = headers.findIndex(h => h.toLowerCase().includes('filled qty'));
   const orderDateTimeIndex = headers.findIndex(h => h.toLowerCase().includes('order date and time'));
   const exchangeOrderIdIndex = headers.findIndex(h => h.toLowerCase().includes('exchange order id'));
+  const executionIdIndex = headers.findIndex(h => h.toLowerCase().includes('execution id'));
 
   if (securityIndex === -1 || sideIndex === -1 || orderQtyIndex === -1 || orderPriceIndex === -1) {
     throw new Error('Invalid CSV format: Missing required columns');
@@ -89,6 +90,7 @@ export function parseOrderTrackerCSV(csvText: string): Order[] {
     const orderPrice = parseNumber(values[orderPriceIndex] || '0');
     const orderValue = parseNumber(values[orderValueIndex] || '0');
     const orderDateTime = values[orderDateTimeIndex]?.trim() || '';
+    const executionId = executionIdIndex >= 0 ? values[executionIdIndex]?.trim() || undefined : undefined;
 
     // Parse date and time
     let orderDate = '';
@@ -102,7 +104,7 @@ export function parseOrderTrackerCSV(csvText: string): Order[] {
     }
 
     const order: Order = {
-      id: `${exchangeOrderId || `order-${i}`}-${Date.now()}-${Math.random()}`,
+      id: executionId ?? `${exchangeOrderId || `order-${i}`}-${Date.now()}-${Math.random()}`,
       security,
       side: side as 'BUY' | 'SELL',
       orderQty,
@@ -112,6 +114,7 @@ export function parseOrderTrackerCSV(csvText: string): Order[] {
       orderTime,
       orderDateTime,
       exchangeOrderId,
+      executionId,
       filledQty: filledQty || orderQty,
       remainingQty,
       orderStatus,

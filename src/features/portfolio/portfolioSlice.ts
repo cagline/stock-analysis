@@ -36,6 +36,27 @@ const portfolioSlice = createSlice({
       state.holdings = calculateHoldings(state.lots, state.currentPrices);
       state.error = null;
     },
+    /** Merge uploaded orders with existing: same executionId (or exchangeOrderId+date+time) = override, else add. No duplicates. */
+    mergeOrders: (state, action: PayloadAction<Order[]>) => {
+      const key = (o: Order) =>
+        o.executionId
+          ? o.executionId
+          : `${o.exchangeOrderId || o.id}|${o.orderDate}|${o.orderTime || ''}`;
+      const merged: Order[] = [...state.orders];
+      for (const order of action.payload) {
+        const k = key(order);
+        const idx = merged.findIndex((o) => key(o) === k);
+        if (idx >= 0) {
+          merged[idx] = order;
+        } else {
+          merged.push(order);
+        }
+      }
+      state.orders = merged;
+      state.lots = processOrdersIntoLots(state.orders, state.stockSplits);
+      state.holdings = calculateHoldings(state.lots, state.currentPrices);
+      state.error = null;
+    },
     setCurrentPrice: (
       state,
       action: PayloadAction<{ security: string; price: number }>
@@ -88,6 +109,7 @@ const portfolioSlice = createSlice({
 
 export const {
   setOrders,
+  mergeOrders,
   setCurrentPrice,
   setCurrentPrices,
   setLoading,

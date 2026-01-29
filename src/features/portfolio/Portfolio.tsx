@@ -54,6 +54,7 @@ import {
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   setOrders,
+  mergeOrders,
   setError,
   selectOrders,
   selectLots,
@@ -70,6 +71,7 @@ import {
   setActionPriceRanges,
 } from './portfolioSlice';
 import { parseOrderTrackerCSV, parseWatchlistCSV, parsePortfolioCSV, parseActionPriceRangesCSV } from './utils/csvParser';
+import { loadOrders as loadOrdersFromDb, saveOrders as saveOrdersToDb } from './utils/orderTrackerDb';
 import { calculateRealizedGainLoss, verifySellOrders } from './utils/lotTracker';
 import { exportToCSV, exportToMarkdown, exportToPDF } from './utils/exportUtils';
 import { generateAllRecommendations } from './utils/recommendationEngine';
@@ -127,7 +129,7 @@ const Portfolio: React.FC = () => {
       try {
         const text = await file.text();
         const parsedOrders = parseOrderTrackerCSV(text);
-        dispatch(setOrders(parsedOrders));
+        dispatch(mergeOrders(parsedOrders));
       } catch (err) {
         dispatch(setError(err instanceof Error ? err.message : 'Failed to parse CSV file'));
       } finally {
@@ -245,6 +247,17 @@ const Portfolio: React.FC = () => {
     }
   }, [dispatch]);
 
+  // Load Order Tracker from IndexedDB on mount
+  useEffect(() => {
+    loadOrdersFromDb()
+      .then((saved) => {
+        if (saved.length > 0) {
+          dispatch(setOrders(saved));
+        }
+      })
+      .catch((e) => console.error('Failed to load orders from IndexedDB', e));
+  }, [dispatch]);
+
   // Save stock splits to localStorage whenever they change
   useEffect(() => {
     if (stockSplits.length > 0) {
@@ -253,6 +266,11 @@ const Portfolio: React.FC = () => {
       localStorage.removeItem('portfolio_stockSplits');
     }
   }, [stockSplits]);
+
+  // Save Order Tracker to IndexedDB whenever orders change (including clear)
+  useEffect(() => {
+    saveOrdersToDb(orders).catch((e) => console.error('Failed to save orders to IndexedDB', e));
+  }, [orders]);
 
   useEffect(() => {
     setTitle('Stock Portfolio Analysis');
