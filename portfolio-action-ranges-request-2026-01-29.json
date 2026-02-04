@@ -1,0 +1,1104 @@
+{
+  "exportDate": "2026-01-29T08:55:27.801Z",
+  "purpose": "Generate Action Price Ranges CSV for portfolio management",
+  "instructions": {
+    "task": "Based on the portfolio data below, generate a CSV file with Action Price Ranges for each security. The CSV should follow the exact format specified.",
+    "csvFormat": {
+      "headers": "Company Code,Quantity,Avg Price,B.E.S Price,Last,Change,% Change,Accumulate Slowly,Strong Add Zone,Re-evaluate if Market Weak,Pause Buys,Trim Small Portion,Investment_Percentage,Time,Trailing Stop (SELL if below)",
+      "description": {
+        "Company Code": "Security symbol (e.g., ACL.N0000)",
+        "Quantity": "Current holding quantity",
+        "Avg Price": "Average buy price from currentPosition.averageBuyPrice",
+        "B.E.S Price": "Break-even sell price (usually avg price + 1-2% buffer for commissions)",
+        "Last": "Current/last price from currentPosition.currentPrice",
+        "Change": "Price change amount (can be 0 if not available)",
+        "% Change": "Price change percentage (can be 0 if not available)",
+        "Accumulate Slowly": "Price range for gradual accumulation (format: '245–250' or 'Below 230')",
+        "Strong Add Zone": "Best price range for aggressive buying (format: '235–240')",
+        "Re-evaluate if Market Weak": "Price threshold to reconsider position (format: 'Below 230')",
+        "Pause Buys": "Price range where buying should pause (format: '260–270')",
+        "Trim Small Portion": "Price level to start taking profits (format: '280+')",
+        "Investment_Percentage": "Percentage of portfolio in this security (calculate from marketValue/totalPortfolioValue)",
+        "Time": "Current timestamp (format: HH:MM:SS.microseconds)",
+        "Trailing Stop (SELL if below)": "Stop loss price level (number only, no text)"
+      },
+      "priceRangeFormats": [
+        "Range format: '245–250' (use en-dash or hyphen between numbers)",
+        "Above threshold: '280+' (use plus sign)",
+        "Below threshold: 'Below 230' (use 'Below' prefix)",
+        "Single value: '250' (just the number)"
+      ],
+      "calculationGuidelines": {
+        "Strong Add Zone": "If unrealizedGainLossPercent > 0: 10-20% below current price. If loss: near support levels (5-10% below avg price)",
+        "Accumulate Slowly": "5-10% below current price, good entry zone for adding",
+        "Pause Buys": "10-15% above current price, consider pausing new purchases",
+        "Trim Small Portion": "20-30% above current price, take partial profits",
+        "Re-evaluate if Market Weak": "15-25% below current price, critical support level",
+        "Trailing Stop": "If profit: 5-10% below current price. If loss: at break-even or 2-3% below avg price"
+      }
+    },
+    "outputFormat": "Return ONLY the CSV content with header row and one row per security. Do not include any explanations or markdown formatting, just the raw CSV."
+  },
+  "portfolioSummary": {
+    "totalSecurities": 27,
+    "totalPortfolioValue": 903881.3,
+    "totalCost": 819923.85,
+    "totalUnrealizedGainLoss": 83957.45
+  },
+  "securities": [
+    {
+      "security": "ACL.N0000",
+      "currentPosition": {
+        "quantity": 380,
+        "averageBuyPrice": 73.29934210526316,
+        "totalCost": 27853.75,
+        "currentPrice": 101,
+        "marketValue": 38380,
+        "unrealizedGainLoss": 10526.25,
+        "unrealizedGainLossPercent": 37.7911412287394,
+        "realizedGainLoss": 1890.5000000000002
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-21",
+          "buyPrice": 72,
+          "quantity": 138
+        },
+        {
+          "buyDate": "2025-10-28",
+          "buyPrice": 73.66666666666667,
+          "quantity": 150
+        },
+        {
+          "buyDate": "2025-11-06",
+          "buyPrice": 73.25,
+          "quantity": 195
+        }
+      ],
+      "investmentPercentage": 4.246132761016296,
+      "breakEvenSellPrice": 74.03233552631579,
+      "suggestedZones": {
+        "strongAddZone": "85.85–90.90",
+        "accumulateSlowly": "90.90–95.95",
+        "pauseBuys": "111.10–116.15",
+        "trimSmallPortion": "121.20+",
+        "trailingStop": 90.9
+      }
+    },
+    {
+      "security": "BUKI.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -1400
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-27",
+          "buyPrice": 1171,
+          "quantity": 5
+        },
+        {
+          "buyDate": "2025-10-28",
+          "buyPrice": 1199,
+          "quantity": 10
+        }
+      ],
+      "investmentPercentage": 0,
+      "breakEvenSellPrice": 0,
+      "suggestedZones": {
+        "trailingStop": 0
+      }
+    },
+    {
+      "security": "CARS.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -841.5
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-27",
+          "buyPrice": 880,
+          "quantity": 11
+        }
+      ],
+      "investmentPercentage": 0,
+      "breakEvenSellPrice": 0,
+      "suggestedZones": {
+        "trailingStop": 0
+      }
+    },
+    {
+      "security": "CCS.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -230
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 118,
+          "quantity": 50
+        }
+      ],
+      "investmentPercentage": 0,
+      "breakEvenSellPrice": 0,
+      "suggestedZones": {
+        "trailingStop": 0
+      }
+    },
+    {
+      "security": "COCO.N0000",
+      "currentPosition": {
+        "quantity": 12,
+        "averageBuyPrice": 70.5,
+        "totalCost": 846,
+        "currentPrice": 71.4,
+        "marketValue": 856.8000000000001,
+        "unrealizedGainLoss": 10.800000000000068,
+        "unrealizedGainLossPercent": 1.2765957446808591,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-28",
+          "buyPrice": 70.5,
+          "quantity": 12
+        }
+      ],
+      "investmentPercentage": 0.0947912076508276,
+      "breakEvenSellPrice": 71.205,
+      "suggestedZones": {
+        "strongAddZone": "60.69–64.26",
+        "accumulateSlowly": "64.26–67.83",
+        "pauseBuys": "78.54–82.11",
+        "trimSmallPortion": "85.68+",
+        "trailingStop": 64.26
+      }
+    },
+    {
+      "security": "COCO.X0000",
+      "currentPosition": {
+        "quantity": 40,
+        "averageBuyPrice": 55.75,
+        "totalCost": 2230,
+        "currentPrice": 56.5,
+        "marketValue": 2260,
+        "unrealizedGainLoss": 30,
+        "unrealizedGainLossPercent": 1.345291479820628,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-28",
+          "buyPrice": 57.3,
+          "quantity": 20
+        },
+        {
+          "buyDate": "2026-01-28",
+          "buyPrice": 54.2,
+          "quantity": 20
+        }
+      ],
+      "investmentPercentage": 0.25003283063827075,
+      "breakEvenSellPrice": 56.3075,
+      "suggestedZones": {
+        "strongAddZone": "48.02–50.85",
+        "accumulateSlowly": "50.85–53.67",
+        "pauseBuys": "62.15–64.97",
+        "trimSmallPortion": "67.80+",
+        "trailingStop": 50.85
+      }
+    },
+    {
+      "security": "COMB.N0000",
+      "currentPosition": {
+        "quantity": 670,
+        "averageBuyPrice": 201.26865671641792,
+        "totalCost": 134850,
+        "currentPrice": 227.5,
+        "marketValue": 152425,
+        "unrealizedGainLoss": 17575,
+        "unrealizedGainLossPercent": 13.032999629217649,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-22",
+          "buyPrice": 207.5,
+          "quantity": 45
+        },
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 205.5,
+          "quantity": 25
+        },
+        {
+          "buyDate": "2025-10-27",
+          "buyPrice": 204.75,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2025-11-06",
+          "buyPrice": 207.75,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2025-11-25",
+          "buyPrice": 208,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 200.25,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 200,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-12-08",
+          "buyPrice": 195,
+          "quantity": 150
+        },
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 200.75,
+          "quantity": 100
+        }
+      ],
+      "investmentPercentage": 16.86338681860107,
+      "breakEvenSellPrice": 203.28134328358212,
+      "suggestedZones": {
+        "strongAddZone": "193.38–204.75",
+        "accumulateSlowly": "204.75–216.13",
+        "pauseBuys": "250.25–261.63",
+        "trimSmallPortion": "273.00+",
+        "trailingStop": 204.75
+      }
+    },
+    {
+      "security": "DIAL.N0000",
+      "currentPosition": {
+        "quantity": 500,
+        "averageBuyPrice": 29.92,
+        "totalCost": 14960,
+        "currentPrice": 32.8,
+        "marketValue": 16400,
+        "unrealizedGainLoss": 1440,
+        "unrealizedGainLossPercent": 9.62566844919786,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-30",
+          "buyPrice": 29,
+          "quantity": 200
+        },
+        {
+          "buyDate": "2025-11-17",
+          "buyPrice": 31,
+          "quantity": 200
+        },
+        {
+          "buyDate": "2025-11-25",
+          "buyPrice": 29.6,
+          "quantity": 100
+        }
+      ],
+      "investmentPercentage": 1.8143975320653274,
+      "breakEvenSellPrice": 30.2192,
+      "suggestedZones": {
+        "strongAddZone": "27.88–29.52",
+        "accumulateSlowly": "29.52–31.16",
+        "pauseBuys": "36.08–37.72",
+        "trimSmallPortion": "39.36+",
+        "trailingStop": 29.52
+      }
+    },
+    {
+      "security": "DOCK.N0000",
+      "currentPosition": {
+        "quantity": 640,
+        "averageBuyPrice": 113.87109375,
+        "totalCost": 72877.5,
+        "currentPrice": 146,
+        "marketValue": 93440,
+        "unrealizedGainLoss": 20562.5,
+        "unrealizedGainLossPercent": 28.21515556927721,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 116.75,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 116.5,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 116,
+          "quantity": 40
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 116,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 115.5,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 115.75,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 110,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 111,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 107,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 107.5,
+          "quantity": 50
+        }
+      ],
+      "investmentPercentage": 10.337640572938062,
+      "breakEvenSellPrice": 115.00980468750001,
+      "suggestedZones": {
+        "strongAddZone": "124.10–131.40",
+        "accumulateSlowly": "131.40–138.70",
+        "pauseBuys": "160.60–167.90",
+        "trimSmallPortion": "175.20+",
+        "trailingStop": 131.4
+      }
+    },
+    {
+      "security": "HAYL.N0000",
+      "currentPosition": {
+        "quantity": 200,
+        "averageBuyPrice": 218.375,
+        "totalCost": 43675,
+        "currentPrice": 245,
+        "marketValue": 49000,
+        "unrealizedGainLoss": 5325,
+        "unrealizedGainLossPercent": 12.192329708070979,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-12",
+          "buyPrice": 207,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2026-01-22",
+          "buyPrice": 229.75,
+          "quantity": 100
+        }
+      ],
+      "investmentPercentage": 5.421065797024454,
+      "breakEvenSellPrice": 220.55875,
+      "suggestedZones": {
+        "strongAddZone": "208.25–220.50",
+        "accumulateSlowly": "220.50–232.75",
+        "pauseBuys": "269.50–281.75",
+        "trimSmallPortion": "294.00+",
+        "trailingStop": 220.5
+      }
+    },
+    {
+      "security": "HNB.N0000",
+      "currentPosition": {
+        "quantity": 1,
+        "averageBuyPrice": 400,
+        "totalCost": 400,
+        "currentPrice": 427.5,
+        "marketValue": 427.5,
+        "unrealizedGainLoss": 27.5,
+        "unrealizedGainLossPercent": 6.875000000000001,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-02",
+          "buyPrice": 400,
+          "quantity": 1
+        }
+      ],
+      "investmentPercentage": 0.04729603322914192,
+      "breakEvenSellPrice": 404,
+      "suggestedZones": {
+        "strongAddZone": "363.38–384.75",
+        "accumulateSlowly": "384.75–406.13",
+        "pauseBuys": "470.25–491.62",
+        "trimSmallPortion": "513.00+",
+        "trailingStop": 384.75
+      }
+    },
+    {
+      "security": "JAT.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -244.99999999999957
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-29",
+          "buyPrice": 50.3,
+          "quantity": 100
+        }
+      ],
+      "investmentPercentage": 0,
+      "breakEvenSellPrice": 0,
+      "suggestedZones": {
+        "trailingStop": 0
+      }
+    },
+    {
+      "security": "JETS.N0000",
+      "currentPosition": {
+        "quantity": 500,
+        "averageBuyPrice": 19.2,
+        "totalCost": 9600,
+        "currentPrice": 18.8,
+        "marketValue": 9400,
+        "unrealizedGainLoss": -200,
+        "unrealizedGainLossPercent": -2.083333333333333,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-13",
+          "buyPrice": 19.2,
+          "quantity": 500
+        }
+      ],
+      "investmentPercentage": 1.039959561061834,
+      "breakEvenSellPrice": 19.392,
+      "suggestedZones": {
+        "strongAddZone": "17.28–18.24",
+        "accumulateSlowly": "16.92–17.86",
+        "pauseBuys": "20.68–21.62",
+        "trimSmallPortion": "22.56+",
+        "trailingStop": 18.816
+      }
+    },
+    {
+      "security": "JKH.N0000",
+      "currentPosition": {
+        "quantity": 3700,
+        "averageBuyPrice": 21.46837837837838,
+        "totalCost": 79433,
+        "currentPrice": 22.8,
+        "marketValue": 84360,
+        "unrealizedGainLoss": 4927,
+        "unrealizedGainLossPercent": 6.2027117193106145,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-21",
+          "buyPrice": 21.8,
+          "quantity": 460
+        },
+        {
+          "buyDate": "2025-10-28",
+          "buyPrice": 21.5,
+          "quantity": 290
+        },
+        {
+          "buyDate": "2025-10-29",
+          "buyPrice": 21,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-11-25",
+          "buyPrice": 22.4,
+          "quantity": 500
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 21.8,
+          "quantity": 950
+        },
+        {
+          "buyDate": "2025-12-08",
+          "buyPrice": 20.8,
+          "quantity": 1000
+        },
+        {
+          "buyDate": "2025-12-10",
+          "buyPrice": 20.9,
+          "quantity": 400
+        }
+      ],
+      "investmentPercentage": 9.333083890550672,
+      "breakEvenSellPrice": 21.683062162162162,
+      "suggestedZones": {
+        "strongAddZone": "19.38–20.52",
+        "accumulateSlowly": "20.52–21.66",
+        "pauseBuys": "25.08–26.22",
+        "trimSmallPortion": "27.36+",
+        "trailingStop": 20.52
+      }
+    },
+    {
+      "security": "KCAB.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -168
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 1150,
+          "quantity": 8
+        }
+      ],
+      "investmentPercentage": 0,
+      "breakEvenSellPrice": 0,
+      "suggestedZones": {
+        "trailingStop": 0
+      }
+    },
+    {
+      "security": "LIOC.N0000",
+      "currentPosition": {
+        "quantity": 324,
+        "averageBuyPrice": 132.14197530864197,
+        "totalCost": 42814,
+        "currentPrice": 141,
+        "marketValue": 45684,
+        "unrealizedGainLoss": 2870,
+        "unrealizedGainLossPercent": 6.703414770869341,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-21",
+          "buyPrice": 136,
+          "quantity": 74
+        },
+        {
+          "buyDate": "2025-10-29",
+          "buyPrice": 139,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2025-11-19",
+          "buyPrice": 132,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-12-15",
+          "buyPrice": 126,
+          "quantity": 100
+        }
+      ],
+      "investmentPercentage": 5.054203466760514,
+      "breakEvenSellPrice": 133.4633950617284,
+      "suggestedZones": {
+        "strongAddZone": "119.85–126.90",
+        "accumulateSlowly": "126.90–133.95",
+        "pauseBuys": "155.10–162.15",
+        "trimSmallPortion": "169.20+",
+        "trailingStop": 126.9
+      }
+    },
+    {
+      "security": "LLUB.N0000",
+      "currentPosition": {
+        "quantity": 100,
+        "averageBuyPrice": 179.75,
+        "totalCost": 17975,
+        "currentPrice": 194.25,
+        "marketValue": 19425,
+        "unrealizedGainLoss": 1450,
+        "unrealizedGainLossPercent": 8.066759388038943,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 179.75,
+          "quantity": 100
+        }
+      ],
+      "investmentPercentage": 2.149065369534694,
+      "breakEvenSellPrice": 181.5475,
+      "suggestedZones": {
+        "strongAddZone": "165.11–174.83",
+        "accumulateSlowly": "174.83–184.54",
+        "pauseBuys": "213.68–223.39",
+        "trimSmallPortion": "233.10+",
+        "trailingStop": 174.82500000000002
+      }
+    },
+    {
+      "security": "MELS.N0000",
+      "currentPosition": {
+        "quantity": 35,
+        "averageBuyPrice": 193,
+        "totalCost": 6755,
+        "currentPrice": 186,
+        "marketValue": 6510,
+        "unrealizedGainLoss": -245,
+        "unrealizedGainLossPercent": -3.6269430051813467,
+        "realizedGainLoss": -232.5
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 193,
+          "quantity": 50
+        }
+      ],
+      "investmentPercentage": 0.7202273130332489,
+      "breakEvenSellPrice": 194.93,
+      "suggestedZones": {
+        "strongAddZone": "173.70–183.35",
+        "accumulateSlowly": "167.40–176.70",
+        "pauseBuys": "204.60–213.90",
+        "trimSmallPortion": "223.20+",
+        "trailingStop": 189.14
+      }
+    },
+    {
+      "security": "NTB.N0000",
+      "currentPosition": {
+        "quantity": 1,
+        "averageBuyPrice": 314,
+        "totalCost": 314,
+        "currentPrice": 343,
+        "marketValue": 343,
+        "unrealizedGainLoss": 29,
+        "unrealizedGainLossPercent": 9.235668789808917,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-02",
+          "buyPrice": 314,
+          "quantity": 1
+        }
+      ],
+      "investmentPercentage": 0.03794746057917118,
+      "breakEvenSellPrice": 317.14,
+      "suggestedZones": {
+        "strongAddZone": "291.55–308.70",
+        "accumulateSlowly": "308.70–325.85",
+        "pauseBuys": "377.30–394.45",
+        "trimSmallPortion": "411.60+",
+        "trailingStop": 308.7
+      }
+    },
+    {
+      "security": "NTB.X0000",
+      "currentPosition": {
+        "quantity": 11,
+        "averageBuyPrice": 393.15909090909093,
+        "totalCost": 4324.75,
+        "currentPrice": 411,
+        "marketValue": 4521,
+        "unrealizedGainLoss": 196.25,
+        "unrealizedGainLossPercent": 4.537834556910804,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-02",
+          "buyPrice": 394.75,
+          "quantity": 1
+        },
+        {
+          "buyDate": "2026-01-12",
+          "buyPrice": 393,
+          "quantity": 10
+        }
+      ],
+      "investmentPercentage": 0.5001762952723992,
+      "breakEvenSellPrice": 397.09068181818185,
+      "suggestedZones": {
+        "strongAddZone": "349.35–369.90",
+        "accumulateSlowly": "369.90–390.45",
+        "pauseBuys": "452.10–472.65",
+        "trimSmallPortion": "493.20+",
+        "trailingStop": 369.90000000000003
+      }
+    },
+    {
+      "security": "SAMP.N0000",
+      "currentPosition": {
+        "quantity": 1160,
+        "averageBuyPrice": 143.88469827586206,
+        "totalCost": 166906.25,
+        "currentPrice": 155.5,
+        "marketValue": 180380,
+        "unrealizedGainLoss": 13473.75,
+        "unrealizedGainLossPercent": 8.072645571990265,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-22",
+          "buyPrice": 149.5,
+          "quantity": 66
+        },
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 149.75,
+          "quantity": 35
+        },
+        {
+          "buyDate": "2025-10-28",
+          "buyPrice": 148.5,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2025-10-30",
+          "buyPrice": 147,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2025-11-03",
+          "buyPrice": 147,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-11-17",
+          "buyPrice": 147,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-11-17",
+          "buyPrice": 147,
+          "quantity": 34
+        },
+        {
+          "buyDate": "2025-11-19",
+          "buyPrice": 146.5,
+          "quantity": 25
+        },
+        {
+          "buyDate": "2025-11-19",
+          "buyPrice": 146.5,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-11-25",
+          "buyPrice": 147.25,
+          "quantity": 50
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 140.25,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 140,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-12-08",
+          "buyPrice": 139.25,
+          "quantity": 200
+        },
+        {
+          "buyDate": "2025-12-15",
+          "buyPrice": 140.5,
+          "quantity": 150
+        }
+      ],
+      "investmentPercentage": 19.95616017280145,
+      "breakEvenSellPrice": 145.3235452586207,
+      "suggestedZones": {
+        "strongAddZone": "132.17–139.95",
+        "accumulateSlowly": "139.95–147.72",
+        "pauseBuys": "171.05–178.82",
+        "trimSmallPortion": "186.60+",
+        "trailingStop": 139.95000000000002
+      }
+    },
+    {
+      "security": "SMOT.N0000",
+      "currentPosition": {
+        "quantity": 10,
+        "averageBuyPrice": 1666,
+        "totalCost": 16660,
+        "currentPrice": 1630,
+        "marketValue": 16300,
+        "unrealizedGainLoss": -360,
+        "unrealizedGainLossPercent": -2.1608643457382954,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 1666,
+          "quantity": 5
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 1666,
+          "quantity": 5
+        }
+      ],
+      "investmentPercentage": 1.8033341324795633,
+      "breakEvenSellPrice": 1682.66,
+      "suggestedZones": {
+        "strongAddZone": "1499.40–1582.70",
+        "accumulateSlowly": "1467.00–1548.50",
+        "pauseBuys": "1793.00–1874.50",
+        "trimSmallPortion": "1956.00+",
+        "trailingStop": 1632.68
+      }
+    },
+    {
+      "security": "SPEN.N0000",
+      "currentPosition": {
+        "quantity": 200,
+        "averageBuyPrice": 147.25,
+        "totalCost": 29450,
+        "currentPrice": 158,
+        "marketValue": 31600,
+        "unrealizedGainLoss": 2150,
+        "unrealizedGainLossPercent": 7.30050933786078,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 147.25,
+          "quantity": 200
+        }
+      ],
+      "investmentPercentage": 3.496034269101485,
+      "breakEvenSellPrice": 148.7225,
+      "suggestedZones": {
+        "strongAddZone": "134.30–142.20",
+        "accumulateSlowly": "142.20–150.10",
+        "pauseBuys": "173.80–181.70",
+        "trimSmallPortion": "189.60+",
+        "trailingStop": 142.20000000000002
+      }
+    },
+    {
+      "security": "TJL.N0000",
+      "currentPosition": {
+        "quantity": 500,
+        "averageBuyPrice": 35.3,
+        "totalCost": 17650,
+        "currentPrice": 34.5,
+        "marketValue": 17250,
+        "unrealizedGainLoss": -400,
+        "unrealizedGainLossPercent": -2.26628895184136,
+        "realizedGainLoss": -163.09999999999974
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 40.9,
+          "quantity": 121
+        },
+        {
+          "buyDate": "2026-01-06",
+          "buyPrice": 34.6,
+          "quantity": 71
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 35.3,
+          "quantity": 500
+        }
+      ],
+      "investmentPercentage": 1.9084364285443232,
+      "breakEvenSellPrice": 35.653,
+      "suggestedZones": {
+        "strongAddZone": "31.77–33.53",
+        "accumulateSlowly": "31.05–32.77",
+        "pauseBuys": "37.95–39.67",
+        "trimSmallPortion": "41.40+",
+        "trailingStop": 34.593999999999994
+      }
+    },
+    {
+      "security": "TKYO.N0000",
+      "currentPosition": {
+        "quantity": 500,
+        "averageBuyPrice": 108,
+        "totalCost": 54000,
+        "currentPrice": 110.25,
+        "marketValue": 55125,
+        "unrealizedGainLoss": 1125,
+        "unrealizedGainLossPercent": 2.083333333333333,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-12-10",
+          "buyPrice": 108.75,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 108.75,
+          "quantity": 250
+        },
+        {
+          "buyDate": "2025-12-16",
+          "buyPrice": 106.25,
+          "quantity": 150
+        }
+      ],
+      "investmentPercentage": 6.098699021652511,
+      "breakEvenSellPrice": 109.08,
+      "suggestedZones": {
+        "strongAddZone": "93.71–99.23",
+        "accumulateSlowly": "99.23–104.74",
+        "pauseBuys": "121.28–126.79",
+        "trimSmallPortion": "132.30+",
+        "trailingStop": 99.22500000000001
+      }
+    },
+    {
+      "security": "TKYO.X0000",
+      "currentPosition": {
+        "quantity": 858,
+        "averageBuyPrice": 88.9855477855478,
+        "totalCost": 76349.6,
+        "currentPrice": 93,
+        "marketValue": 79794,
+        "unrealizedGainLoss": 3444.399999999994,
+        "unrealizedGainLossPercent": 4.51135303917767,
+        "realizedGainLoss": 0
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 87.2,
+          "quantity": 200
+        },
+        {
+          "buyDate": "2025-12-15",
+          "buyPrice": 85.3,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2025-12-15",
+          "buyPrice": 85.2,
+          "quantity": 98
+        },
+        {
+          "buyDate": "2025-12-16",
+          "buyPrice": 86.4,
+          "quantity": 150
+        },
+        {
+          "buyDate": "2026-01-27",
+          "buyPrice": 94,
+          "quantity": 10
+        },
+        {
+          "buyDate": "2026-01-27",
+          "buyPrice": 93.8,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2026-01-27",
+          "buyPrice": 93.9,
+          "quantity": 100
+        },
+        {
+          "buyDate": "2026-01-27",
+          "buyPrice": 93.6,
+          "quantity": 100
+        }
+      ],
+      "investmentPercentage": 8.82792906546468,
+      "breakEvenSellPrice": 89.87540326340327,
+      "suggestedZones": {
+        "strongAddZone": "79.05–83.70",
+        "accumulateSlowly": "83.70–88.35",
+        "pauseBuys": "102.30–106.95",
+        "trimSmallPortion": "111.60+",
+        "trailingStop": 83.7
+      }
+    },
+    {
+      "security": "UCAR.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -3102
+      },
+      "priceHistory": [
+        {
+          "buyDate": "2025-10-27",
+          "buyPrice": 1257,
+          "quantity": 12
+        },
+        {
+          "buyDate": "2025-11-06",
+          "buyPrice": 1428,
+          "quantity": 12
+        }
+      ],
+      "investmentPercentage": 0,
+      "breakEvenSellPrice": 0,
+      "suggestedZones": {
+        "trailingStop": 0
+      }
+    }
+  ],
+  "exampleCSVRow": "ACL.N0000,380,73.74,74.56,107.00,1.75,1.66,95-100,85-90,Below 80,115-120,130+,5.80%,13:29:03.301165,95"
+}

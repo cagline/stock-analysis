@@ -1,0 +1,1510 @@
+{
+  "exportDate": "2026-01-29T08:38:28.963Z",
+  "portfolioSummary": {
+    "totalSecurities": 27,
+    "totalPortfolioValue": 903881.3,
+    "totalCost": 819923.85,
+    "totalUnrealizedGainLoss": 83957.45,
+    "securitiesWithRecommendations": 0
+  },
+  "securities": [
+    {
+      "security": "ACL.N0000",
+      "currentPosition": {
+        "quantity": 380,
+        "averageBuyPrice": 73.29934210526316,
+        "totalCost": 27853.75,
+        "currentPrice": 101,
+        "marketValue": 38380,
+        "unrealizedGainLoss": 10526.25,
+        "unrealizedGainLossPercent": 37.7911412287394,
+        "realizedGainLoss": 1890.5000000000002
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-21",
+          "buyPrice": 72,
+          "originalBuyPrice": 216,
+          "quantity": 138,
+          "originalQuantity": 46,
+          "remainingQuantity": 35,
+          "totalCost": 9936,
+          "splitRatio": 3,
+          "sellOrders": [
+            {
+              "sellDate": "2025-12-08",
+              "sellPrice": 81.25,
+              "quantity": 48,
+              "gainLoss": 444,
+              "gainLossPercent": 12.847222222222221
+            },
+            {
+              "sellDate": "2026-01-02",
+              "sellPrice": 97.9,
+              "quantity": 35,
+              "gainLoss": 906.5000000000002,
+              "gainLossPercent": 35.97222222222223
+            },
+            {
+              "sellDate": "2026-01-02",
+              "sellPrice": 99,
+              "quantity": 20,
+              "gainLoss": 540,
+              "gainLossPercent": 37.5
+            }
+          ],
+          "realizedGainLoss": 1890.5000000000002,
+          "unrealizedGainLoss": 1015
+        },
+        {
+          "buyDate": "2025-10-28",
+          "buyPrice": 73.66666666666667,
+          "originalBuyPrice": 221,
+          "quantity": 150,
+          "originalQuantity": 50,
+          "remainingQuantity": 150,
+          "totalCost": 11050,
+          "splitRatio": 3,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 4099.999999999999
+        },
+        {
+          "buyDate": "2025-11-06",
+          "buyPrice": 73.25,
+          "originalBuyPrice": 219.75,
+          "quantity": 195,
+          "originalQuantity": 65,
+          "remainingQuantity": 195,
+          "totalCost": 14283.75,
+          "splitRatio": 3,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 5411.25
+        }
+      ]
+    },
+    {
+      "security": "BUKI.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -1400
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-27",
+          "buyPrice": 1171,
+          "quantity": 5,
+          "remainingQuantity": 0,
+          "totalCost": 5855,
+          "sellOrders": [
+            {
+              "sellDate": "2025-11-06",
+              "sellPrice": 1125,
+              "quantity": 5,
+              "gainLoss": -230,
+              "gainLossPercent": -3.928266438941076
+            }
+          ],
+          "realizedGainLoss": -230,
+          "unrealizedGainLoss": null
+        },
+        {
+          "buyDate": "2025-10-28",
+          "buyPrice": 1199,
+          "quantity": 10,
+          "remainingQuantity": 0,
+          "totalCost": 11990,
+          "sellOrders": [
+            {
+              "sellDate": "2025-11-17",
+              "sellPrice": 1082,
+              "quantity": 10,
+              "gainLoss": -1170,
+              "gainLossPercent": -9.7581317764804
+            }
+          ],
+          "realizedGainLoss": -1170,
+          "unrealizedGainLoss": null
+        }
+      ]
+    },
+    {
+      "security": "CARS.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -841.5
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-27",
+          "buyPrice": 880,
+          "quantity": 11,
+          "remainingQuantity": 0,
+          "totalCost": 9680,
+          "sellOrders": [
+            {
+              "sellDate": "2025-11-06",
+              "sellPrice": 803.5,
+              "quantity": 2,
+              "gainLoss": -153,
+              "gainLossPercent": -8.693181818181818
+            },
+            {
+              "sellDate": "2025-11-06",
+              "sellPrice": 803.5,
+              "quantity": 9,
+              "gainLoss": -688.5,
+              "gainLossPercent": -8.693181818181818
+            }
+          ],
+          "realizedGainLoss": -841.5,
+          "unrealizedGainLoss": null
+        }
+      ]
+    },
+    {
+      "security": "CCS.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -230
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 118,
+          "quantity": 50,
+          "remainingQuantity": 0,
+          "totalCost": 5900,
+          "sellOrders": [
+            {
+              "sellDate": "2026-01-08",
+              "sellPrice": 112,
+              "quantity": 10,
+              "gainLoss": -60,
+              "gainLossPercent": -5.084745762711865
+            },
+            {
+              "sellDate": "2026-01-09",
+              "sellPrice": 113.75,
+              "quantity": 40,
+              "gainLoss": -170,
+              "gainLossPercent": -3.6016949152542375
+            }
+          ],
+          "realizedGainLoss": -230,
+          "unrealizedGainLoss": null
+        }
+      ]
+    },
+    {
+      "security": "COCO.N0000",
+      "currentPosition": {
+        "quantity": 12,
+        "averageBuyPrice": 70.5,
+        "totalCost": 846,
+        "currentPrice": 71.4,
+        "marketValue": 856.8000000000001,
+        "unrealizedGainLoss": 10.800000000000068,
+        "unrealizedGainLossPercent": 1.2765957446808591,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-28",
+          "buyPrice": 70.5,
+          "quantity": 12,
+          "remainingQuantity": 12,
+          "totalCost": 846,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 10.800000000000068
+        }
+      ]
+    },
+    {
+      "security": "COCO.X0000",
+      "currentPosition": {
+        "quantity": 40,
+        "averageBuyPrice": 55.75,
+        "totalCost": 2230,
+        "currentPrice": 56.5,
+        "marketValue": 2260,
+        "unrealizedGainLoss": 30,
+        "unrealizedGainLossPercent": 1.345291479820628,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-28",
+          "buyPrice": 57.3,
+          "quantity": 20,
+          "remainingQuantity": 20,
+          "totalCost": 1146,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -15.999999999999943
+        },
+        {
+          "buyDate": "2026-01-28",
+          "buyPrice": 54.2,
+          "quantity": 20,
+          "remainingQuantity": 20,
+          "totalCost": 1084,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 45.99999999999994
+        }
+      ]
+    },
+    {
+      "security": "COMB.N0000",
+      "currentPosition": {
+        "quantity": 670,
+        "averageBuyPrice": 201.26865671641792,
+        "totalCost": 134850,
+        "currentPrice": 227.5,
+        "marketValue": 152425,
+        "unrealizedGainLoss": 17575,
+        "unrealizedGainLossPercent": 13.032999629217649,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-22",
+          "buyPrice": 207.5,
+          "quantity": 45,
+          "remainingQuantity": 45,
+          "totalCost": 9337.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 900
+        },
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 205.5,
+          "quantity": 25,
+          "remainingQuantity": 25,
+          "totalCost": 5137.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 550
+        },
+        {
+          "buyDate": "2025-10-27",
+          "buyPrice": 204.75,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 10237.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1137.5
+        },
+        {
+          "buyDate": "2025-11-06",
+          "buyPrice": 207.75,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 10387.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 987.5
+        },
+        {
+          "buyDate": "2025-11-25",
+          "buyPrice": 208,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 10400,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 975
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 200.25,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 20025,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 2725
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 200,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 20000,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 2750
+        },
+        {
+          "buyDate": "2025-12-08",
+          "buyPrice": 195,
+          "quantity": 150,
+          "remainingQuantity": 150,
+          "totalCost": 29250,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 4875
+        },
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 200.75,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 20075,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 2675
+        }
+      ]
+    },
+    {
+      "security": "DIAL.N0000",
+      "currentPosition": {
+        "quantity": 500,
+        "averageBuyPrice": 29.92,
+        "totalCost": 14960,
+        "currentPrice": 32.8,
+        "marketValue": 16400,
+        "unrealizedGainLoss": 1440,
+        "unrealizedGainLossPercent": 9.62566844919786,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-30",
+          "buyPrice": 29,
+          "quantity": 200,
+          "remainingQuantity": 200,
+          "totalCost": 5800,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 759.9999999999994
+        },
+        {
+          "buyDate": "2025-11-17",
+          "buyPrice": 31,
+          "quantity": 200,
+          "remainingQuantity": 200,
+          "totalCost": 6200,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 359.99999999999943
+        },
+        {
+          "buyDate": "2025-11-25",
+          "buyPrice": 29.6,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 2960,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 319.99999999999955
+        }
+      ]
+    },
+    {
+      "security": "DOCK.N0000",
+      "currentPosition": {
+        "quantity": 640,
+        "averageBuyPrice": 113.87109375,
+        "totalCost": 72877.5,
+        "currentPrice": 146,
+        "marketValue": 93440,
+        "unrealizedGainLoss": 20562.5,
+        "unrealizedGainLossPercent": 28.21515556927721,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 116.75,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 11675,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 2925
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 116.5,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 11650,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 2950
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 116,
+          "quantity": 40,
+          "remainingQuantity": 40,
+          "totalCost": 4640,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1200
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 116,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 5800,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1500
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 115.5,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 11550,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 3050
+        },
+        {
+          "buyDate": "2026-01-16",
+          "buyPrice": 115.75,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 5787.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1512.5
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 110,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 5500,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1800
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 111,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 5550,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1750
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 107,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 5350,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1950
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 107.5,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 5375,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1925
+        }
+      ]
+    },
+    {
+      "security": "HAYL.N0000",
+      "currentPosition": {
+        "quantity": 200,
+        "averageBuyPrice": 218.375,
+        "totalCost": 43675,
+        "currentPrice": 245,
+        "marketValue": 49000,
+        "unrealizedGainLoss": 5325,
+        "unrealizedGainLossPercent": 12.192329708070979,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-12",
+          "buyPrice": 207,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 20700,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 3800
+        },
+        {
+          "buyDate": "2026-01-22",
+          "buyPrice": 229.75,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 22975,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1525
+        }
+      ]
+    },
+    {
+      "security": "HNB.N0000",
+      "currentPosition": {
+        "quantity": 1,
+        "averageBuyPrice": 400,
+        "totalCost": 400,
+        "currentPrice": 427.5,
+        "marketValue": 427.5,
+        "unrealizedGainLoss": 27.5,
+        "unrealizedGainLossPercent": 6.875000000000001,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-02",
+          "buyPrice": 400,
+          "quantity": 1,
+          "remainingQuantity": 1,
+          "totalCost": 400,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 27.5
+        }
+      ]
+    },
+    {
+      "security": "JAT.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -244.99999999999957
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-29",
+          "buyPrice": 50.3,
+          "quantity": 100,
+          "remainingQuantity": 0,
+          "totalCost": 5030,
+          "sellOrders": [
+            {
+              "sellDate": "2025-12-08",
+              "sellPrice": 47.7,
+              "quantity": 50,
+              "gainLoss": -129.99999999999972,
+              "gainLossPercent": -5.168986083498995
+            },
+            {
+              "sellDate": "2026-01-09",
+              "sellPrice": 48,
+              "quantity": 50,
+              "gainLoss": -114.99999999999986,
+              "gainLossPercent": -4.572564612326039
+            }
+          ],
+          "realizedGainLoss": -244.99999999999957,
+          "unrealizedGainLoss": null
+        }
+      ]
+    },
+    {
+      "security": "JETS.N0000",
+      "currentPosition": {
+        "quantity": 500,
+        "averageBuyPrice": 19.2,
+        "totalCost": 9600,
+        "currentPrice": 18.8,
+        "marketValue": 9400,
+        "unrealizedGainLoss": -200,
+        "unrealizedGainLossPercent": -2.083333333333333,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-13",
+          "buyPrice": 19.2,
+          "quantity": 500,
+          "remainingQuantity": 500,
+          "totalCost": 9600,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -199.9999999999993
+        }
+      ]
+    },
+    {
+      "security": "JKH.N0000",
+      "currentPosition": {
+        "quantity": 3700,
+        "averageBuyPrice": 21.46837837837838,
+        "totalCost": 79433,
+        "currentPrice": 22.8,
+        "marketValue": 84360,
+        "unrealizedGainLoss": 4927,
+        "unrealizedGainLossPercent": 6.2027117193106145,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-21",
+          "buyPrice": 21.8,
+          "quantity": 460,
+          "remainingQuantity": 460,
+          "totalCost": 10028,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 460
+        },
+        {
+          "buyDate": "2025-10-28",
+          "buyPrice": 21.5,
+          "quantity": 290,
+          "remainingQuantity": 290,
+          "totalCost": 6235,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 377.0000000000002
+        },
+        {
+          "buyDate": "2025-10-29",
+          "buyPrice": 21,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 2100,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 180.00000000000006
+        },
+        {
+          "buyDate": "2025-11-25",
+          "buyPrice": 22.4,
+          "quantity": 500,
+          "remainingQuantity": 500,
+          "totalCost": 11200,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 200.00000000000108
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 21.8,
+          "quantity": 950,
+          "remainingQuantity": 950,
+          "totalCost": 20710,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 950
+        },
+        {
+          "buyDate": "2025-12-08",
+          "buyPrice": 20.8,
+          "quantity": 1000,
+          "remainingQuantity": 1000,
+          "totalCost": 20800,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 2000
+        },
+        {
+          "buyDate": "2025-12-10",
+          "buyPrice": 20.9,
+          "quantity": 400,
+          "remainingQuantity": 400,
+          "totalCost": 8360,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 760.0000000000009
+        }
+      ]
+    },
+    {
+      "security": "KCAB.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -168
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 1150,
+          "quantity": 8,
+          "remainingQuantity": 0,
+          "totalCost": 9200,
+          "sellOrders": [
+            {
+              "sellDate": "2025-11-06",
+              "sellPrice": 1150,
+              "quantity": 2,
+              "gainLoss": 0,
+              "gainLossPercent": 0
+            },
+            {
+              "sellDate": "2025-11-06",
+              "sellPrice": 1122,
+              "quantity": 6,
+              "gainLoss": -168,
+              "gainLossPercent": -2.4347826086956523
+            }
+          ],
+          "realizedGainLoss": -168,
+          "unrealizedGainLoss": null
+        }
+      ]
+    },
+    {
+      "security": "LIOC.N0000",
+      "currentPosition": {
+        "quantity": 324,
+        "averageBuyPrice": 132.14197530864197,
+        "totalCost": 42814,
+        "currentPrice": 141,
+        "marketValue": 45684,
+        "unrealizedGainLoss": 2870,
+        "unrealizedGainLossPercent": 6.703414770869341,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-21",
+          "buyPrice": 136,
+          "quantity": 74,
+          "remainingQuantity": 74,
+          "totalCost": 10064,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 370
+        },
+        {
+          "buyDate": "2025-10-29",
+          "buyPrice": 139,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 6950,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 100
+        },
+        {
+          "buyDate": "2025-11-19",
+          "buyPrice": 132,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 13200,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 900
+        },
+        {
+          "buyDate": "2025-12-15",
+          "buyPrice": 126,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 12600,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1500
+        }
+      ]
+    },
+    {
+      "security": "LLUB.N0000",
+      "currentPosition": {
+        "quantity": 100,
+        "averageBuyPrice": 179.75,
+        "totalCost": 17975,
+        "currentPrice": 194.25,
+        "marketValue": 19425,
+        "unrealizedGainLoss": 1450,
+        "unrealizedGainLossPercent": 8.066759388038943,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 179.75,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 17975,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1450
+        }
+      ]
+    },
+    {
+      "security": "MELS.N0000",
+      "currentPosition": {
+        "quantity": 35,
+        "averageBuyPrice": 193,
+        "totalCost": 6755,
+        "currentPrice": 186,
+        "marketValue": 6510,
+        "unrealizedGainLoss": -245,
+        "unrealizedGainLossPercent": -3.6269430051813467,
+        "realizedGainLoss": -232.5
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 193,
+          "quantity": 50,
+          "remainingQuantity": 35,
+          "totalCost": 9650,
+          "sellOrders": [
+            {
+              "sellDate": "2026-01-08",
+              "sellPrice": 178.25,
+              "quantity": 5,
+              "gainLoss": -73.75,
+              "gainLossPercent": -7.642487046632124
+            },
+            {
+              "sellDate": "2026-01-12",
+              "sellPrice": 177,
+              "quantity": 5,
+              "gainLoss": -80,
+              "gainLossPercent": -8.290155440414509
+            },
+            {
+              "sellDate": "2026-01-12",
+              "sellPrice": 177.25,
+              "quantity": 5,
+              "gainLoss": -78.75,
+              "gainLossPercent": -8.160621761658032
+            }
+          ],
+          "realizedGainLoss": -232.5,
+          "unrealizedGainLoss": -245
+        }
+      ]
+    },
+    {
+      "security": "NTB.N0000",
+      "currentPosition": {
+        "quantity": 1,
+        "averageBuyPrice": 314,
+        "totalCost": 314,
+        "currentPrice": 343,
+        "marketValue": 343,
+        "unrealizedGainLoss": 29,
+        "unrealizedGainLossPercent": 9.235668789808917,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-02",
+          "buyPrice": 314,
+          "quantity": 1,
+          "remainingQuantity": 1,
+          "totalCost": 314,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 29
+        }
+      ]
+    },
+    {
+      "security": "NTB.X0000",
+      "currentPosition": {
+        "quantity": 11,
+        "averageBuyPrice": 393.15909090909093,
+        "totalCost": 4324.75,
+        "currentPrice": 411,
+        "marketValue": 4521,
+        "unrealizedGainLoss": 196.25,
+        "unrealizedGainLossPercent": 4.537834556910804,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-02",
+          "buyPrice": 394.75,
+          "quantity": 1,
+          "remainingQuantity": 1,
+          "totalCost": 394.75,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 16.25
+        },
+        {
+          "buyDate": "2026-01-12",
+          "buyPrice": 393,
+          "quantity": 10,
+          "remainingQuantity": 10,
+          "totalCost": 3930,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 180
+        }
+      ]
+    },
+    {
+      "security": "SAMP.N0000",
+      "currentPosition": {
+        "quantity": 1160,
+        "averageBuyPrice": 143.88469827586206,
+        "totalCost": 166906.25,
+        "currentPrice": 155.5,
+        "marketValue": 180380,
+        "unrealizedGainLoss": 13473.75,
+        "unrealizedGainLossPercent": 8.072645571990265,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-22",
+          "buyPrice": 149.5,
+          "quantity": 66,
+          "remainingQuantity": 66,
+          "totalCost": 9867,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 396
+        },
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 149.75,
+          "quantity": 35,
+          "remainingQuantity": 35,
+          "totalCost": 5241.25,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 201.25
+        },
+        {
+          "buyDate": "2025-10-28",
+          "buyPrice": 148.5,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 7425,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 350
+        },
+        {
+          "buyDate": "2025-10-30",
+          "buyPrice": 147,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 7350,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 425
+        },
+        {
+          "buyDate": "2025-11-03",
+          "buyPrice": 147,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 14700,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 850
+        },
+        {
+          "buyDate": "2025-11-17",
+          "buyPrice": 147,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 14700,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 850
+        },
+        {
+          "buyDate": "2025-11-17",
+          "buyPrice": 147,
+          "quantity": 34,
+          "remainingQuantity": 34,
+          "totalCost": 4998,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 289
+        },
+        {
+          "buyDate": "2025-11-19",
+          "buyPrice": 146.5,
+          "quantity": 25,
+          "remainingQuantity": 25,
+          "totalCost": 3662.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 225
+        },
+        {
+          "buyDate": "2025-11-19",
+          "buyPrice": 146.5,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 14650,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 900
+        },
+        {
+          "buyDate": "2025-11-25",
+          "buyPrice": 147.25,
+          "quantity": 50,
+          "remainingQuantity": 50,
+          "totalCost": 7362.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 412.5
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 140.25,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 14025,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1525
+        },
+        {
+          "buyDate": "2025-12-01",
+          "buyPrice": 140,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 14000,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1550
+        },
+        {
+          "buyDate": "2025-12-08",
+          "buyPrice": 139.25,
+          "quantity": 200,
+          "remainingQuantity": 200,
+          "totalCost": 27850,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 3250
+        },
+        {
+          "buyDate": "2025-12-15",
+          "buyPrice": 140.5,
+          "quantity": 150,
+          "remainingQuantity": 150,
+          "totalCost": 21075,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 2250
+        }
+      ]
+    },
+    {
+      "security": "SMOT.N0000",
+      "currentPosition": {
+        "quantity": 10,
+        "averageBuyPrice": 1666,
+        "totalCost": 16660,
+        "currentPrice": 1630,
+        "marketValue": 16300,
+        "unrealizedGainLoss": -360,
+        "unrealizedGainLossPercent": -2.1608643457382954,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 1666,
+          "quantity": 5,
+          "remainingQuantity": 5,
+          "totalCost": 8330,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -180
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 1666,
+          "quantity": 5,
+          "remainingQuantity": 5,
+          "totalCost": 8330,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -180
+        }
+      ]
+    },
+    {
+      "security": "SPEN.N0000",
+      "currentPosition": {
+        "quantity": 200,
+        "averageBuyPrice": 147.25,
+        "totalCost": 29450,
+        "currentPrice": 158,
+        "marketValue": 31600,
+        "unrealizedGainLoss": 2150,
+        "unrealizedGainLossPercent": 7.30050933786078,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 147.25,
+          "quantity": 200,
+          "remainingQuantity": 200,
+          "totalCost": 29450,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 2150
+        }
+      ]
+    },
+    {
+      "security": "TJL.N0000",
+      "currentPosition": {
+        "quantity": 500,
+        "averageBuyPrice": 35.3,
+        "totalCost": 17650,
+        "currentPrice": 34.5,
+        "marketValue": 17250,
+        "unrealizedGainLoss": -400,
+        "unrealizedGainLossPercent": -2.26628895184136,
+        "realizedGainLoss": -163.09999999999974
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-23",
+          "buyPrice": 40.9,
+          "quantity": 121,
+          "remainingQuantity": 0,
+          "totalCost": 4948.9,
+          "sellOrders": [
+            {
+              "sellDate": "2025-12-08",
+              "sellPrice": 36.3,
+              "quantity": 50,
+              "gainLoss": -230.00000000000006,
+              "gainLossPercent": -11.246943765281177
+            },
+            {
+              "sellDate": "2026-01-08",
+              "sellPrice": 36.7,
+              "quantity": 70,
+              "gainLoss": -293.9999999999997,
+              "gainLossPercent": -10.268948655256715
+            },
+            {
+              "sellDate": "2026-01-09",
+              "sellPrice": 39.7,
+              "quantity": 1,
+              "gainLoss": -1.1999999999999957,
+              "gainLossPercent": -2.933985330073339
+            }
+          ],
+          "realizedGainLoss": -525.1999999999998,
+          "unrealizedGainLoss": null
+        },
+        {
+          "buyDate": "2026-01-06",
+          "buyPrice": 34.6,
+          "quantity": 71,
+          "remainingQuantity": 0,
+          "totalCost": 2456.6,
+          "sellOrders": [
+            {
+              "sellDate": "2026-01-09",
+              "sellPrice": 39.7,
+              "quantity": 71,
+              "gainLoss": 362.1000000000001,
+              "gainLossPercent": 14.739884393063587
+            }
+          ],
+          "realizedGainLoss": 362.1000000000001,
+          "unrealizedGainLoss": null
+        },
+        {
+          "buyDate": "2026-01-19",
+          "buyPrice": 35.3,
+          "quantity": 500,
+          "remainingQuantity": 500,
+          "totalCost": 17650,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -399.9999999999986
+        }
+      ]
+    },
+    {
+      "security": "TKYO.N0000",
+      "currentPosition": {
+        "quantity": 500,
+        "averageBuyPrice": 108,
+        "totalCost": 54000,
+        "currentPrice": 110.25,
+        "marketValue": 55125,
+        "unrealizedGainLoss": 1125,
+        "unrealizedGainLossPercent": 2.083333333333333,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-12-10",
+          "buyPrice": 108.75,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 10875,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 150
+        },
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 108.75,
+          "quantity": 250,
+          "remainingQuantity": 250,
+          "totalCost": 27187.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 375
+        },
+        {
+          "buyDate": "2025-12-16",
+          "buyPrice": 106.25,
+          "quantity": 150,
+          "remainingQuantity": 150,
+          "totalCost": 15937.5,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 600
+        }
+      ]
+    },
+    {
+      "security": "TKYO.X0000",
+      "currentPosition": {
+        "quantity": 858,
+        "averageBuyPrice": 88.9855477855478,
+        "totalCost": 76349.6,
+        "currentPrice": 93,
+        "marketValue": 79794,
+        "unrealizedGainLoss": 3444.399999999994,
+        "unrealizedGainLossPercent": 4.51135303917767,
+        "realizedGainLoss": 0
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-12-12",
+          "buyPrice": 87.2,
+          "quantity": 200,
+          "remainingQuantity": 200,
+          "totalCost": 17440,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 1159.9999999999995
+        },
+        {
+          "buyDate": "2025-12-15",
+          "buyPrice": 85.3,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 8530,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 770.0000000000002
+        },
+        {
+          "buyDate": "2025-12-15",
+          "buyPrice": 85.2,
+          "quantity": 98,
+          "remainingQuantity": 98,
+          "totalCost": 8349.6,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 764.3999999999997
+        },
+        {
+          "buyDate": "2025-12-16",
+          "buyPrice": 86.4,
+          "quantity": 150,
+          "remainingQuantity": 150,
+          "totalCost": 12960,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": 989.9999999999991
+        },
+        {
+          "buyDate": "2026-01-27",
+          "buyPrice": 94,
+          "quantity": 10,
+          "remainingQuantity": 10,
+          "totalCost": 940,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -10
+        },
+        {
+          "buyDate": "2026-01-27",
+          "buyPrice": 93.8,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 9380,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -79.99999999999972
+        },
+        {
+          "buyDate": "2026-01-27",
+          "buyPrice": 93.9,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 9390,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -90.00000000000057
+        },
+        {
+          "buyDate": "2026-01-27",
+          "buyPrice": 93.6,
+          "quantity": 100,
+          "remainingQuantity": 100,
+          "totalCost": 9360,
+          "sellOrders": [],
+          "realizedGainLoss": 0,
+          "unrealizedGainLoss": -59.99999999999943
+        }
+      ]
+    },
+    {
+      "security": "UCAR.N0000",
+      "currentPosition": {
+        "quantity": 0,
+        "averageBuyPrice": 0,
+        "totalCost": 0,
+        "marketValue": 0,
+        "unrealizedGainLoss": 0,
+        "unrealizedGainLossPercent": 0,
+        "realizedGainLoss": -3102
+      },
+      "actionPriceRanges": null,
+      "recommendation": null,
+      "lotDetails": [
+        {
+          "buyDate": "2025-10-27",
+          "buyPrice": 1257,
+          "quantity": 12,
+          "remainingQuantity": 0,
+          "totalCost": 15084,
+          "sellOrders": [
+            {
+              "sellDate": "2025-12-08",
+              "sellPrice": 1213.25,
+              "quantity": 12,
+              "gainLoss": -525,
+              "gainLossPercent": -3.4805091487669055
+            }
+          ],
+          "realizedGainLoss": -525,
+          "unrealizedGainLoss": null
+        },
+        {
+          "buyDate": "2025-11-06",
+          "buyPrice": 1428,
+          "quantity": 12,
+          "remainingQuantity": 0,
+          "totalCost": 17136,
+          "sellOrders": [
+            {
+              "sellDate": "2025-12-08",
+              "sellPrice": 1213.25,
+              "quantity": 12,
+              "gainLoss": -2577,
+              "gainLossPercent": -15.038515406162464
+            }
+          ],
+          "realizedGainLoss": -2577,
+          "unrealizedGainLoss": null
+        }
+      ]
+    }
+  ]
+}
