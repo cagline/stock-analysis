@@ -1,5 +1,5 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
-import {baseQueryWithReauth} from './interceptorsSlice';
+import {baseQueryWithReauth} from '../../api/interceptorsSlice';
 
 interface ToDo {
     id: number;
@@ -7,7 +7,7 @@ interface ToDo {
     title: string;
 }
 
-export const apiSlice = createApi({
+export const todoApiSlice = createApi({
     reducerPath: 'todo',
     baseQuery: baseQueryWithReauth,
     tagTypes: ['todo'], // There are some other advance cache Recipes like > Optimistic Updates > Pessimistic Updates ...
@@ -50,4 +50,5 @@ export const apiSlice = createApi({
     }),
 });
 
-export const {useLazyGetToDosQuery, useLazyGetToDoQuery,  useCreateToDoMutation, useUpdateToDoMutation, useDeleteToDoMutation} = apiSlice;
+export const {useLazyGetToDosQuery, useLazyGetToDoQuery, useCreateToDoMutation, useUpdateToDoMutation, useDeleteToDoMutation} = todoApiSlice;
+export type { ToDo };

@@ -6,11 +6,11 @@ import Select from '@mui/material/Select';
 
 import React, { useState } from "react";
 import MenuIcon from '@mui/icons-material/Menu';
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { changeThemeMode, selectThemeMode } from "../../appSlice";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { changeThemeMode, selectThemeMode } from "../appSlice";
 import { Trans, useTranslation } from "react-i18next";
 import type { SelectChangeEvent } from '@mui/material/Select';
-import { usePageTitle } from "../../layouts/usePageTitle";
+import { usePageTitle } from "../layouts/usePageTitle";
 
 const drawerWidth = 240;
 

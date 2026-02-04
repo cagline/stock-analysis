@@ -1,5 +1,5 @@
 import { Box, Button, Container, SvgIcon, Typography } from "@mui/material";
-import WarningIcon from "../../assets/icons/warning.svg?react";
+import WarningIcon from "../assets/icons/warning.svg?react";
 import React, { Component } from "react";
 
 interface ErrorBoundaryProps {

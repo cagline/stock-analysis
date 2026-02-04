@@ -3,31 +3,46 @@ import { useRoutes } from "react-router-dom";
 import DashboardLayout from "./layouts/DashboardLayout";
 import UnauthorizedLayout from "./layouts/UnauthorizedLayout";
 
-const Error = lazy(() => import("./features/error/Error"));
-const Home = lazy(() => import("./features/home/Home"));
-const About = lazy(() => import("./features/help/Help"));
-const Todo = lazy(() => import("./features/todo/Todo"));
-const Counter = lazy(() => import("./features/counter/Counter"));
-const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
-const Portfolio = lazy(() => import("./features/portfolio/Portfolio"));
+// Lazy load from feature index (per IMPLEMENTATION-GUIDE.md)
+const ErrorPage = lazy(() =>
+  import("./features/error").then((m) => ({ default: m.ErrorPage }))
+);
+const HomePage = lazy(() =>
+  import("./features/home").then((m) => ({ default: m.HomePage }))
+);
+const HelpPage = lazy(() =>
+  import("./features/help").then((m) => ({ default: m.HelpPage }))
+);
+const TodoPage = lazy(() =>
+  import("./features/todo").then((m) => ({ default: m.TodoPage }))
+);
+const CounterPage = lazy(() =>
+  import("./features/counter").then((m) => ({ default: m.CounterPage }))
+);
+const DashboardPage = lazy(() =>
+  import("./features/dashboard").then((m) => ({ default: m.DashboardPage }))
+);
+const PortfolioPage = lazy(() =>
+  import("./features/portfolio").then((m) => ({ default: m.PortfolioPage }))
+);
 
 export default function AppRoutes() {
   return useRoutes([
     {
       element: <DashboardLayout />,
       children: [
-        { path: "/", element: <Dashboard /> },
-        { path: "counter", element: <Counter /> },
-        { path: "todo", element: <Todo /> },
-        { path: "portfolio", element: <Portfolio /> },
-        { path: "error", element: <Error /> },
+        { path: "/", element: <DashboardPage /> },
+        { path: "counter", element: <CounterPage /> },
+        { path: "todo", element: <TodoPage /> },
+        { path: "portfolio", element: <PortfolioPage /> },
+        { path: "error", element: <ErrorPage /> },
       ],
     },
     {
       element: <UnauthorizedLayout />,
       children: [
-        { path: "home", element: <Home /> },
-        { path: "about", element: <About /> },
+        { path: "home", element: <HomePage /> },
+        { path: "about", element: <HelpPage /> },
       ],
     },
   ]);

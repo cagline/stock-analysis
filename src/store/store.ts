@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import type { ThunkAction, Action } from '@reduxjs/toolkit';
-import counterReducer from '../features/counter/counterSlice';
+import { counterReducer } from '../features/counter';
 import appReducer from '../appSlice';
-import portfolioReducer from '../features/portfolio/portfolioSlice';
-import {apiSlice as todoApiSlice} from '../api/todoApiSlice';
+import { portfolioReducer } from '../features/portfolio';
+import { todoApiSlice } from '../features/todo';
 
 export const store = configureStore({
   reducer: {

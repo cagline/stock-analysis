@@ -24,7 +24,7 @@ import {
 import MuiDrawer from "@mui/material/Drawer";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import logoUrl from "../../logo.jpg";
+import logoUrl from "../logo.jpg";
 
 const drawerWidth = 240;
 
