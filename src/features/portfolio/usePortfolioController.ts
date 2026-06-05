@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   setOrders,
@@ -18,12 +18,33 @@ import {
   setStockSplits,
   setActionPriceRanges,
 } from './portfolioSlice';
-import { parseOrderTrackerCSV, parseWatchlistCSV, parsePortfolioCSV, parseActionPriceRangesCSV } from './utils/csvParser';
+import { parseOrderTrackerCSV, parseWatchlistRows, parsePortfolioRows, portfolioRowsToAdjustments, parseActionPriceRangesCSV } from './utils/csvParser';
+import { readPortfolioFileAsCsv } from './utils/readPortfolioFile';
+import { localDateString, tradingDateFromFile } from './utils/tradingDateFromFile';
 import { loadOrders as loadOrdersFromDb, saveOrders as saveOrdersToDb } from './utils/orderTrackerDb';
 import { calculateRealizedGainLoss, verifySellOrders } from './utils/lotTracker';
 import { exportToCSV, exportToMarkdown, exportToPDF } from './utils/exportUtils';
 import { generateAllRecommendations } from './utils/recommendationEngine';
-import { exportAIMetadata, exportAIMarkdown, exportAIMetadataForActionRanges } from './utils/aiMetadataExport';
+import {
+  exportAIMetadata,
+  exportAIMarkdown,
+  exportAIMetadataForActionRanges,
+  type AIExportContext,
+} from './utils/aiMetadataExport';
+import {
+  fetchPortfolioBootstrap,
+  putPortfolioOrders,
+  putStockSplits,
+  putSecurityPrices,
+  putActionPriceRanges,
+  putPortfolioAdjustments,
+  postPriceHistory,
+  postPortfolioSnapshotHistory,
+  fetchPriceHistory,
+  fetchPortfolioSnapshotSummary,
+} from './utils/portfolioRemote';
+import type { PortfolioSnapshotSummaryRow } from './utils/portfolioRemote';
+import type { PriceHistoryPoint } from './utils/recommendationEngine';
 import type { StockSplit } from './types';
 import { usePageTitle } from '../../layouts/usePageTitle';
 
@@ -81,9 +102,24 @@ export function usePortfolioController() {
     portfolio: false,
     actionRanges: false,
   });
+  const [portfolioApiEnabled, setPortfolioApiEnabled] = useState(false);
+  const [watchlistTradingDate, setWatchlistTradingDate] = useState(localDateString);
+  const [watchlistTradingDateTouched, setWatchlistTradingDateTouched] = useState(false);
+  const [portfolioSnapshotDate, setPortfolioSnapshotDateState] = useState(localDateString);
+  const [portfolioSnapshotDateTouched, setPortfolioSnapshotDateTouched] = useState(false);
+  const [priceHistoryBySecurity, setPriceHistoryBySecurity] = useState<
+    Record<string, PriceHistoryPoint[]>
+  >({});
+  const [portfolioSnapshotSummary, setPortfolioSnapshotSummary] = useState<
+    PortfolioSnapshotSummaryRow[]
+  >([]);
+  const [aiCopySnackOpen, setAiCopySnackOpen] = useState(false);
 
   // Computed values
-  const recommendations = generateAllRecommendations(holdings, actionPriceRanges);
+  const recommendations = useMemo(
+    () => generateAllRecommendations(holdings, actionPriceRanges, priceHistoryBySecurity),
+    [holdings, actionPriceRanges, priceHistoryBySecurity]
+  );
   const realizedGainLoss = calculateRealizedGainLoss(lots, portfolioData);
   const verification = verifySellOrders(lots, orders);
   const holdingsArray = Object.values(holdings).sort((a, b) =>
@@ -94,6 +130,15 @@ export function usePortfolioController() {
     0
   );
   const totalPortfolioValue = holdingsArray.reduce((sum, h) => sum + (h.marketValue || 0), 0);
+
+  const aiExportContext: AIExportContext = useMemo(
+    () => ({
+      priceHistoryBySecurity,
+      portfolioTrajectory: portfolioSnapshotSummary,
+      totalPortfolioValue,
+    }),
+    [priceHistoryBySecurity, portfolioSnapshotSummary, totalPortfolioValue]
+  );
 
   // File upload handlers
   const handleFileUpload = useCallback(
@@ -128,8 +173,32 @@ export function usePortfolioController() {
 
       try {
         const text = await file.text();
-        const priceMap = parseWatchlistCSV(text);
+        const rows = parseWatchlistRows(text);
+        const tradingDate = watchlistTradingDateTouched
+          ? watchlistTradingDate
+          : tradingDateFromFile(file);
+        if (!watchlistTradingDateTouched) {
+          setWatchlistTradingDate(tradingDate);
+        }
+        const priceMap: Record<string, number> = {};
+        for (const row of rows) {
+          priceMap[row.security] = row.lastPrice;
+        }
         dispatch(setCurrentPrices(priceMap));
+
+        if (portfolioApiEnabled) {
+          const result = await postPriceHistory(rows, tradingDate, file.name);
+          if (!result.ok) {
+            dispatch(
+              setError(
+                result.error
+                  ? `Prices updated locally; history save failed: ${result.error}`
+                  : 'Prices updated locally; history save failed'
+              )
+            );
+          }
+        }
+        setWatchlistTradingDateTouched(false);
       } catch (err) {
         dispatch(setError(err instanceof Error ? err.message : 'Failed to parse Watchlist CSV file'));
       } finally {
@@ -137,7 +206,7 @@ export function usePortfolioController() {
         event.target.value = '';
       }
     },
-    [dispatch]
+    [dispatch, portfolioApiEnabled, watchlistTradingDate, watchlistTradingDateTouched]
   );
 
   const handlePortfolioUpload = useCallback(
@@ -149,17 +218,39 @@ export function usePortfolioController() {
       setUploading(prev => ({ ...prev, portfolio: true }));
 
       try {
-        const text = await file.text();
-        const data = parsePortfolioCSV(text);
+        const csvText = await readPortfolioFileAsCsv(file);
+        const rows = parsePortfolioRows(csvText);
+        const data = portfolioRowsToAdjustments(rows);
         setPortfolioData(data);
+
+        const snapshotDate = portfolioSnapshotDateTouched
+          ? portfolioSnapshotDate
+          : tradingDateFromFile(file);
+        if (!portfolioSnapshotDateTouched) {
+          setPortfolioSnapshotDateState(snapshotDate);
+        }
+
+        if (portfolioApiEnabled) {
+          const result = await postPortfolioSnapshotHistory(rows, snapshotDate, file.name);
+          if (!result.ok) {
+            dispatch(
+              setError(
+                result.error
+                  ? `Portfolio loaded locally; history save failed: ${result.error}`
+                  : 'Portfolio loaded locally; history save failed'
+              )
+            );
+          }
+        }
+        setPortfolioSnapshotDateTouched(false);
       } catch (err) {
-        dispatch(setError(err instanceof Error ? err.message : 'Failed to parse Portfolio CSV file'));
+        dispatch(setError(err instanceof Error ? err.message : 'Failed to parse Portfolio file'));
       } finally {
         setUploading(prev => ({ ...prev, portfolio: false }));
         event.target.value = '';
       }
     },
-    [dispatch]
+    [dispatch, portfolioApiEnabled, portfolioSnapshotDate, portfolioSnapshotDateTouched]
   );
 
   const handleActionPriceRangesUpload = useCallback(
@@ -260,7 +351,7 @@ export function usePortfolioController() {
   };
 
   const handleExportAIActionRanges = () => {
-    const metadata = exportAIMetadataForActionRanges(holdings, totalPortfolioValue);
+    const metadata = exportAIMetadataForActionRanges(holdings, aiExportContext);
     const blob = new Blob([metadata], { type: 'application/json' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -274,7 +365,12 @@ export function usePortfolioController() {
   };
 
   const handleExportAIMetadata = () => {
-    const metadata = exportAIMetadata(holdings, recommendations, actionPriceRanges, totalPortfolioValue);
+    const metadata = exportAIMetadata(
+      holdings,
+      recommendations,
+      actionPriceRanges,
+      aiExportContext
+    );
     const blob = new Blob([metadata], { type: 'application/json' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -288,7 +384,12 @@ export function usePortfolioController() {
   };
 
   const handleExportAIMarkdown = () => {
-    const markdown = exportAIMarkdown(holdings, recommendations, actionPriceRanges, totalPortfolioValue);
+    const markdown = exportAIMarkdown(
+      holdings,
+      recommendations,
+      actionPriceRanges,
+      aiExportContext
+    );
     const blob = new Blob([markdown], { type: 'text/markdown' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -301,46 +402,203 @@ export function usePortfolioController() {
     setAiExportMenuAnchor(null);
   };
 
-  // Effects
-  // Load stock splits from localStorage on mount
+  const handleCopyAIMarkdown = async () => {
+    const markdown = exportAIMarkdown(
+      holdings,
+      recommendations,
+      actionPriceRanges,
+      aiExportContext
+    );
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setAiCopySnackOpen(true);
+    } catch {
+      const blob = new Blob([markdown], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+    setAiExportMenuAnchor(null);
+  };
+
+  // Effects — Portfolio API + Postgres (Vite proxies /api → portfolio-api), or IndexedDB / localStorage
   useEffect(() => {
-    const savedSplits = localStorage.getItem('portfolio_stockSplits');
-    if (savedSplits) {
-      try {
-        const parsed = JSON.parse(savedSplits);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          dispatch(setStockSplits(parsed));
+    let cancelled = false;
+
+    const loadLocalFallback = () => {
+      const savedSplits = localStorage.getItem('portfolio_stockSplits');
+      if (savedSplits) {
+        try {
+          const parsed = JSON.parse(savedSplits);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            dispatch(setStockSplits(parsed));
+          }
+        } catch (e) {
+          console.error('Failed to load saved stock splits', e);
         }
-      } catch (e) {
-        console.error('Failed to load saved stock splits', e);
       }
-    }
-  }, [dispatch]);
+      loadOrdersFromDb()
+        .then((saved) => {
+          if (saved.length > 0) {
+            dispatch(setOrders(saved));
+          }
+        })
+        .catch((e) => console.error('Failed to load orders from IndexedDB', e));
+    };
 
-  // Load Order Tracker from IndexedDB on mount
-  useEffect(() => {
-    loadOrdersFromDb()
-      .then((saved) => {
-        if (saved.length > 0) {
-          dispatch(setOrders(saved));
+    (async () => {
+      const boot = await fetchPortfolioBootstrap();
+      if (cancelled) return;
+      if (!boot) {
+        loadLocalFallback();
+        return;
+      }
+
+      const nextOrders = Array.isArray(boot.orders) ? boot.orders : [];
+      dispatch(setOrders(nextOrders));
+
+      const nextSplits = Array.isArray(boot.stockSplits) ? boot.stockSplits : [];
+      if (nextSplits.length > 0) {
+        dispatch(setStockSplits(nextSplits));
+      }
+
+      if (boot.currentPrices && Object.keys(boot.currentPrices).length > 0) {
+        dispatch(setCurrentPrices(boot.currentPrices));
+      }
+      if (boot.actionPriceRanges && Object.keys(boot.actionPriceRanges).length > 0) {
+        dispatch(setActionPriceRanges(boot.actionPriceRanges));
+      }
+      if (boot.portfolioAdjustments && Object.keys(boot.portfolioAdjustments).length > 0) {
+        setPortfolioData(boot.portfolioAdjustments);
+      }
+
+      if (nextOrders.length === 0) {
+        const localOrders = await loadOrdersFromDb();
+        if (!cancelled && localOrders.length > 0) {
+          dispatch(setOrders(localOrders));
+          await putPortfolioOrders(localOrders);
         }
-      })
-      .catch((e) => console.error('Failed to load orders from IndexedDB', e));
+      }
+
+      if (nextSplits.length === 0) {
+        const raw = localStorage.getItem('portfolio_stockSplits');
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw) as StockSplit[];
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              if (!cancelled) {
+                dispatch(setStockSplits(parsed));
+                await putStockSplits(parsed);
+              }
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+
+      if (!cancelled) {
+        setPortfolioApiEnabled(true);
+      }
+    })().catch(() => {
+      if (!cancelled) loadLocalFallback();
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch]);
 
-  // Save stock splits to localStorage whenever they change
   useEffect(() => {
-    if (stockSplits.length > 0) {
-      localStorage.setItem('portfolio_stockSplits', JSON.stringify(stockSplits));
-    } else {
-      localStorage.removeItem('portfolio_stockSplits');
+    if (!portfolioApiEnabled) {
+      saveOrdersToDb(orders).catch((e) => console.error('Failed to save orders to IndexedDB', e));
+      return;
     }
-  }, [stockSplits]);
+    const t = window.setTimeout(() => {
+      putPortfolioOrders(orders).catch((e) => console.error('Failed to sync orders to API', e));
+    }, 500);
+    return () => window.clearTimeout(t);
+  }, [orders, portfolioApiEnabled]);
 
-  // Save Order Tracker to IndexedDB whenever orders change
   useEffect(() => {
-    saveOrdersToDb(orders).catch((e) => console.error('Failed to save orders to IndexedDB', e));
-  }, [orders]);
+    if (!portfolioApiEnabled) {
+      if (stockSplits.length > 0) {
+        localStorage.setItem('portfolio_stockSplits', JSON.stringify(stockSplits));
+      } else {
+        localStorage.removeItem('portfolio_stockSplits');
+      }
+      return;
+    }
+    const t = window.setTimeout(() => {
+      putStockSplits(stockSplits).catch((e) => console.error('Failed to sync stock splits to API', e));
+    }, 500);
+    return () => window.clearTimeout(t);
+  }, [stockSplits, portfolioApiEnabled]);
+
+  useEffect(() => {
+    if (!portfolioApiEnabled) return;
+    const t = window.setTimeout(() => {
+      putSecurityPrices(currentPrices).catch((e) => console.error('Failed to sync prices to API', e));
+    }, 500);
+    return () => window.clearTimeout(t);
+  }, [currentPrices, portfolioApiEnabled]);
+
+  useEffect(() => {
+    if (!portfolioApiEnabled) return;
+    const t = window.setTimeout(() => {
+      putActionPriceRanges(actionPriceRanges).catch((e) =>
+        console.error('Failed to sync action ranges to API', e)
+      );
+    }, 500);
+    return () => window.clearTimeout(t);
+  }, [actionPriceRanges, portfolioApiEnabled]);
+
+  useEffect(() => {
+    if (!portfolioApiEnabled) return;
+    const t = window.setTimeout(() => {
+      putPortfolioAdjustments(portfolioData).catch((e) =>
+        console.error('Failed to sync portfolio adjustments to API', e)
+      );
+    }, 500);
+    return () => window.clearTimeout(t);
+  }, [portfolioData, portfolioApiEnabled]);
+
+  useEffect(() => {
+    if (!portfolioApiEnabled) {
+      setPriceHistoryBySecurity({});
+      setPortfolioSnapshotSummary([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const [priceData, summaryData] = await Promise.all([
+        fetchPriceHistory({ limit: 10000 }),
+        fetchPortfolioSnapshotSummary(),
+      ]);
+      if (cancelled) return;
+      if (priceData?.rows) {
+        const map: Record<string, PriceHistoryPoint[]> = {};
+        for (const row of priceData.rows) {
+          if (!map[row.security]) map[row.security] = [];
+          map[row.security].push({
+            tradingDate: row.tradingDate,
+            lastPrice: row.lastPrice,
+          });
+        }
+        setPriceHistoryBySecurity(map);
+      } else {
+        setPriceHistoryBySecurity({});
+      }
+      setPortfolioSnapshotSummary(summaryData?.rows ?? []);
+    })().catch(() => {
+      if (!cancelled) {
+        setPriceHistoryBySecurity({});
+        setPortfolioSnapshotSummary([]);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [portfolioApiEnabled]);
 
   // Set page title
   useEffect(() => {
@@ -382,6 +640,16 @@ export function usePortfolioController() {
     aiExportMenuAnchor,
     setAiExportMenuAnchor,
     uploading,
+    watchlistTradingDate,
+    setWatchlistTradingDate: (date: string) => {
+      setWatchlistTradingDateTouched(true);
+      setWatchlistTradingDate(date);
+    },
+    portfolioSnapshotDate,
+    setPortfolioSnapshotDate: (date: string) => {
+      setPortfolioSnapshotDateTouched(true);
+      setPortfolioSnapshotDateState(date);
+    },
 
     // Handlers
     handleFileUpload,
@@ -401,5 +669,8 @@ export function usePortfolioController() {
     handleExportAIActionRanges,
     handleExportAIMetadata,
     handleExportAIMarkdown,
+    handleCopyAIMarkdown,
+    aiCopySnackOpen,
+    setAiCopySnackOpen,
   };
 }

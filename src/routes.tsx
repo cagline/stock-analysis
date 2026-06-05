@@ -25,6 +25,12 @@ const DashboardPage = lazy(() =>
 const PortfolioPage = lazy(() =>
   import("./features/portfolio").then((m) => ({ default: m.PortfolioPage }))
 );
+const PriceHistoryPage = lazy(() =>
+  import("./features/price-history").then((m) => ({ default: m.PriceHistoryPage }))
+);
+const PortfolioHistoryPage = lazy(() =>
+  import("./features/portfolio-history").then((m) => ({ default: m.PortfolioHistoryPage }))
+);
 
 export default function AppRoutes() {
   return useRoutes([
@@ -35,6 +41,8 @@ export default function AppRoutes() {
         { path: "counter", element: <CounterPage /> },
         { path: "todo", element: <TodoPage /> },
         { path: "portfolio", element: <PortfolioPage /> },
+        { path: "price-history", element: <PriceHistoryPage /> },
+        { path: "portfolio-history", element: <PortfolioHistoryPage /> },
         { path: "error", element: <ErrorPage /> },
       ],
     },

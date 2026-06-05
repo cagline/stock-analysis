@@ -27,9 +27,21 @@ This feature provides lot-wise gain/loss analysis for stock portfolios imported 
   - Unrealized gain/loss for remaining holdings
 
 ### 4. Current Price Management
+- Upload Watchlist CSV to update current prices (merged by ticker)
+- Optionally set a **trading date** when uploading; saves a daily snapshot to Postgres when the API is running
 - Manually set current prices for securities
 - Automatically calculates unrealized gain/loss when prices are set
 - Market value calculation based on current prices
+
+### 5. Price History (`/price-history`)
+- Browse daily watchlist snapshots stored in `security_prices_history`
+- Filter by security and date range; sortable table
+- Upload watchlist CSV directly from this page (same format as Portfolio)
+
+### 6. Portfolio History (`/portfolio-history`)
+- Browse daily portfolio snapshots in `portfolio_snapshots_history`
+- Upload Portfolio CSV or Excel (`.xlsx`) exports from ATrad
+- Snapshot date defaults to the file's saved date
 
 ## Data Processing Logic
 
@@ -68,8 +80,10 @@ This feature provides lot-wise gain/loss analysis for stock portfolios imported 
 1. Navigate to `/portfolio` route
 2. Click "Upload Order Tracker CSV"
 3. Select your exported CSV file from ATrad
-4. View holdings overview and lot-wise analysis
-5. Optionally set current prices to see unrealized gain/loss
+4. Upload Watchlist CSV (set trading date if not today) to refresh prices and save daily history
+5. View holdings overview and lot-wise analysis
+6. Optionally set current prices to see unrealized gain/loss
+7. Open `/price-history` to review price trends by security over time
 
 ## CSV Format Requirements
 
@@ -86,6 +100,24 @@ The CSV should have the following columns (from ATrad Order Tracker export):
 - Exchange Order Id
 
 ## Technical Details
+
+**PostgreSQL:** For a phased plan to persist portfolio data in PostgreSQL (schema, API sketch, client integration), see [POSTGRESQL_PLAN.md](./POSTGRESQL_PLAN.md).
+
+**Implementation (as built):** See [docs/PORTFOLIO-BACKEND-IMPLEMENTATION.md](../../../docs/PORTFOLIO-BACKEND-IMPLEMENTATION.md) — architecture, files, scripts, API routes, env vars, and troubleshooting.
+
+### Local backend (Docker + API)
+
+1. Copy `.env.example` → `.env` at the repo root.
+2. Start Postgres: `npm run docker:db`
+3. Apply schema: `npm run db:migrate`
+4. Start Portfolio API: `npm run portfolio-api` (default `http://localhost:3002`)
+5. Start the web app: `npm run dev` — Vite proxies `/api` to the Portfolio API.
+
+With the API running, the portfolio page loads and saves orders, splits, prices, action ranges, and portfolio CSV adjustments through Postgres. If the API is down, it falls back to IndexedDB and `localStorage` for orders and splits.
+
+**If `/api/portfolio/bootstrap` returns 500**, open the response body in DevTools: it now includes PostgreSQL `code` and a `hint` when applicable. Common fixes: run `npm run db:migrate`, ensure `npm run docker:db` is up, restart `npm run portfolio-api` after pulling changes, and confirm `.env` at the **repo root** matches Docker (`DATABASE_URL`). Check `http://localhost:3002/api/health/db` (JSON `database: "up"`).
+
+`VITE_PORTFOLIO_API_BASE` is optional (leave unset in dev to use same-origin `/api`). Set it in production if the API is on another origin.
 
 ### State Management
 - Uses Redux Toolkit for state management

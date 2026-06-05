@@ -1,4 +1,10 @@
 import type { SecurityHolding, ActionPriceRange, SecurityRecommendation, TradingRecommendation } from '../types';
+import {
+  priceHistoryTrendContext,
+  type PriceHistoryPoint,
+} from '../../../shared/historyInsights';
+
+export type { PriceHistoryPoint };
 
 /**
  * Parses a price range string like "245–250", "280+", "Below 230"
@@ -73,9 +79,51 @@ function isPriceAbove(price: number, threshold: number | undefined): boolean {
 /**
  * Generates trading recommendation based on current price and action zones
  */
+function enrichReasonWithTrend(
+  baseReason: string,
+  baseConfidence: 'HIGH' | 'MEDIUM' | 'LOW',
+  historyPoints?: PriceHistoryPoint[],
+  recommendation?: TradingRecommendation
+): { reason: string; confidence: 'HIGH' | 'MEDIUM' | 'LOW' } {
+  const trend = historyPoints?.length ? priceHistoryTrendContext(historyPoints) : null;
+  if (!trend) {
+    return { reason: baseReason, confidence: baseConfidence };
+  }
+
+  let reason = `${baseReason}. ${trend}`;
+  let confidence: 'HIGH' | 'MEDIUM' | 'LOW' = baseConfidence;
+
+  const sorted = [...historyPoints!].sort((a, b) =>
+    a.tradingDate.localeCompare(b.tradingDate)
+  );
+  const trendingDown =
+    sorted.length >= 2 &&
+    sorted[sorted.length - 1].lastPrice < sorted[0].lastPrice;
+  const trendingUp =
+    sorted.length >= 2 &&
+    sorted[sorted.length - 1].lastPrice > sorted[0].lastPrice;
+
+  if (
+    (recommendation === 'BUY_NEW' || recommendation === 'ADD_ACCUMULATE') &&
+    trendingDown
+  ) {
+    confidence = 'HIGH';
+  } else if (
+    (recommendation === 'TRIM' || recommendation === 'STRONG_STOP_TAKE_PROFIT') &&
+    trendingUp
+  ) {
+    confidence = 'HIGH';
+  } else if (recommendation === 'HOLD') {
+    confidence = 'LOW';
+  }
+
+  return { reason, confidence };
+}
+
 export function generateRecommendation(
   holding: SecurityHolding,
-  actionRange: ActionPriceRange
+  actionRange: ActionPriceRange,
+  priceHistory?: PriceHistoryPoint[]
 ): SecurityRecommendation | null {
   if (!holding.currentPrice) {
     return null;
@@ -156,11 +204,13 @@ export function generateRecommendation(
     }
   }
 
+  const enriched = enrichReasonWithTrend(reason, confidence, priceHistory, recommendation);
+
   return {
     security: holding.security,
     recommendation,
-    confidence,
-    reason,
+    confidence: enriched.confidence,
+    reason: enriched.reason,
     currentPrice,
     targetZones: {
       accumulateSlowly: accumulateSlowlyRange || undefined,
@@ -178,7 +228,8 @@ export function generateRecommendation(
  */
 export function generateAllRecommendations(
   holdings: Record<string, SecurityHolding>,
-  actionRanges: Record<string, ActionPriceRange>
+  actionRanges: Record<string, ActionPriceRange>,
+  priceHistoryBySecurity: Record<string, PriceHistoryPoint[]> = {}
 ): Record<string, SecurityRecommendation> {
   const recommendations: Record<string, SecurityRecommendation> = {};
 
@@ -187,7 +238,11 @@ export function generateAllRecommendations(
     const actionRange = actionRanges[security];
     
     if (actionRange && holding.currentPrice) {
-      const recommendation = generateRecommendation(holding, actionRange);
+      const recommendation = generateRecommendation(
+        holding,
+        actionRange,
+        priceHistoryBySecurity[security]
+      );
       if (recommendation) {
         recommendations[security] = recommendation;
       }

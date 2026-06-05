@@ -20,6 +20,8 @@ import {
   Home,
   ErrorOutline,
   AccountBalanceWallet,
+  ShowChart,
+  History,
 } from "@mui/icons-material";
 import MuiDrawer from "@mui/material/Drawer";
 import { useNavigate } from "react-router-dom";
@@ -185,6 +187,32 @@ const SideNav = ({ open, onDrawerOpen, onDrawerClose }: any) => {
               <AccountBalanceWallet />
             </ListItemIcon>
             <ListItemText primary="Portfolio" sx={{ opacity: open ? 1 : 0 }} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key={'PriceHistory'} disablePadding sx={{ display: 'block' }}>
+          <ListItemButton
+            sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5 }}
+            onClick={() => {
+              navigate(`/price-history`);
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <ShowChart />
+            </ListItemIcon>
+            <ListItemText primary="Price History" sx={{ opacity: open ? 1 : 0 }} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key={'PortfolioHistory'} disablePadding sx={{ display: 'block' }}>
+          <ListItemButton
+            sx={{ minHeight: 48, justifyContent: open ? 'initial' : 'center', px: 2.5 }}
+            onClick={() => {
+              navigate(`/portfolio-history`);
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <History />
+            </ListItemIcon>
+            <ListItemText primary="Portfolio History" sx={{ opacity: open ? 1 : 0 }} />
           </ListItemButton>
         </ListItem>
 

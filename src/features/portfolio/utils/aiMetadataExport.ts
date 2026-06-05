@@ -1,54 +1,115 @@
-import type { 
-  SecurityHolding, 
-  SecurityRecommendation, 
-  ActionPriceRange
+import type {
+  SecurityHolding,
+  SecurityRecommendation,
+  ActionPriceRange,
 } from '../types';
+import type { PriceHistoryPoint } from './recommendationEngine';
+import type { PortfolioSnapshotSummaryRow } from './portfolioRemote';
+import { priceHistoryTrendContext } from '../../../shared/historyInsights';
 
-/**
- * Exports portfolio data in a structured format optimized for AI analysis
- * Returns JSON string that can be uploaded to ChatGPT, Claude, or other AI agents
- */
-export function exportAIMetadata(
-  holdings: Record<string, SecurityHolding>,
-  recommendations: Record<string, SecurityRecommendation>,
-  actionRanges: Record<string, ActionPriceRange>,
-  totalPortfolioValue?: number
-): string {
-  const holdingsArray = Object.values(holdings).sort((a, b) =>
-    a.security.localeCompare(b.security)
+export type AIExportContext = {
+  priceHistoryBySecurity?: Record<string, PriceHistoryPoint[]>;
+  portfolioTrajectory?: PortfolioSnapshotSummaryRow[];
+  totalPortfolioValue?: number;
+};
+
+function sortedPriceHistory(points?: PriceHistoryPoint[]): PriceHistoryPoint[] {
+  if (!points?.length) return [];
+  return [...points].sort((a, b) => a.tradingDate.localeCompare(b.tradingDate));
+}
+
+function enrichLotStats(holding: SecurityHolding) {
+  const openLots = holding.lots.filter((l) => l.remainingQuantity > 0);
+  let inProfit = 0;
+  let inLoss = 0;
+  const cp = holding.currentPrice;
+  if (cp != null) {
+    for (const lot of openLots) {
+      const gl = lot.remainingQuantity * (cp - lot.buyPrice);
+      if (gl >= 0) inProfit++;
+      else inLoss++;
+    }
+  }
+  const lastBuyDate =
+    openLots.length > 0
+      ? openLots.reduce((latest, lot) => (lot.buyDate > latest ? lot.buyDate : latest), '')
+      : null;
+  return {
+    openLotCount: openLots.length,
+    lotsInProfit: inProfit,
+    lotsInLoss: inLoss,
+    lastBuyDate,
+  };
+}
+
+function formatPriceHistoryBlock(points: PriceHistoryPoint[]): object[] {
+  return sortedPriceHistory(points).map((p) => ({
+    date: p.tradingDate,
+    lastPrice: p.lastPrice,
+  }));
+}
+
+function portfolioTrajectorySection(trajectory?: PortfolioSnapshotSummaryRow[]) {
+  if (!trajectory?.length) return null;
+  const sorted = [...trajectory].sort((a, b) =>
+    a.snapshotDate.localeCompare(b.snapshotDate)
   );
+  const first = sorted[0];
+  const last = sorted[sorted.length - 1];
+  const valueChangePct =
+    first.totalMarketValue > 0
+      ? (((last.totalMarketValue - first.totalMarketValue) / first.totalMarketValue) * 100).toFixed(2)
+      : null;
+  return {
+    snapshotCount: sorted.length,
+    firstSnapshot: first.snapshotDate,
+    latestSnapshot: last.snapshotDate,
+    valueChangePercentSinceFirst: valueChangePct,
+    points: sorted.map((r) => ({
+      date: r.snapshotDate,
+      totalMarketValue: r.totalMarketValue,
+      totalCost: r.totalCost,
+      totalUnrealizedGainLoss: r.totalUnrealizedGainLoss,
+    })),
+  };
+}
 
-  const metadata = {
-    exportDate: new Date().toISOString(),
-    portfolioSummary: {
-      totalSecurities: holdingsArray.length,
-      totalPortfolioValue: totalPortfolioValue || holdingsArray.reduce((sum, h) => sum + (h.marketValue || 0), 0),
-      totalCost: holdingsArray.reduce((sum, h) => sum + h.totalCost, 0),
-      totalUnrealizedGainLoss: holdingsArray.reduce((sum, h) => sum + (h.unrealizedGainLoss || 0), 0),
-      securitiesWithRecommendations: Object.keys(recommendations).length,
+function mapSecurityForExport(
+  holding: SecurityHolding,
+  recommendation: SecurityRecommendation | undefined,
+  actionRange: ActionPriceRange | undefined,
+  priceHistory: PriceHistoryPoint[] | undefined,
+  portfolioValue: number
+) {
+  const realizedGainLoss = holding.lots.reduce(
+    (sum, lot) => sum + lot.sellOrders.reduce((s, sell) => s + sell.gainLoss, 0),
+    0
+  );
+  const history = sortedPriceHistory(priceHistory);
+  const trendSummary = history.length ? priceHistoryTrendContext(history) : null;
+  const positionPct =
+    portfolioValue > 0 && holding.marketValue != null
+      ? Number(((holding.marketValue / portfolioValue) * 100).toFixed(2))
+      : null;
+
+  return {
+    security: holding.security,
+    positionPercentOfPortfolio: positionPct,
+    priceHistory: formatPriceHistoryBlock(history),
+    priceTrendSummary: trendSummary,
+    positionStats: enrichLotStats(holding),
+    currentPosition: {
+      quantity: holding.totalQuantity,
+      averageBuyPrice: holding.averageBuyPrice,
+      totalCost: holding.totalCost,
+      currentPrice: holding.currentPrice,
+      marketValue: holding.marketValue,
+      unrealizedGainLoss: holding.unrealizedGainLoss,
+      unrealizedGainLossPercent: holding.unrealizedGainLossPercent,
+      realizedGainLoss,
     },
-    securities: holdingsArray.map(holding => {
-      const recommendation = recommendations[holding.security];
-      const actionRange = actionRanges[holding.security];
-      
-      // Calculate realized gain/loss from lots
-      const realizedGainLoss = holding.lots.reduce((sum, lot) => {
-        return sum + lot.sellOrders.reduce((s, sell) => s + sell.gainLoss, 0);
-      }, 0);
-
-      return {
-        security: holding.security,
-        currentPosition: {
-          quantity: holding.totalQuantity,
-          averageBuyPrice: holding.averageBuyPrice,
-          totalCost: holding.totalCost,
-          currentPrice: holding.currentPrice,
-          marketValue: holding.marketValue,
-          unrealizedGainLoss: holding.unrealizedGainLoss,
-          unrealizedGainLossPercent: holding.unrealizedGainLossPercent,
-          realizedGainLoss: realizedGainLoss,
-        },
-        actionPriceRanges: actionRange ? {
+    actionPriceRanges: actionRange
+      ? {
           breakEvenSellPrice: actionRange.breakEvenSellPrice,
           accumulateSlowly: actionRange.accumulateSlowly,
           strongAddZone: actionRange.strongAddZone,
@@ -57,49 +118,153 @@ export function exportAIMetadata(
           trimSmallPortion: actionRange.trimSmallPortion,
           trailingStop: actionRange.trailingStop,
           investmentPercentage: actionRange.investmentPercentage,
-        } : null,
-        recommendation: recommendation ? {
+        }
+      : null,
+    recommendation: recommendation
+      ? {
           action: recommendation.recommendation,
           confidence: recommendation.confidence,
           reason: recommendation.reason,
           targetZones: recommendation.targetZones,
-        } : null,
-        lotDetails: holding.lots.map(lot => {
-          const currentPrice = holding.currentPrice;
-          const unrealizedGainLoss =
-            currentPrice && lot.remainingQuantity > 0
-              ? lot.remainingQuantity * (currentPrice - lot.buyPrice)
-              : null;
-          const totalRealizedGainLoss = lot.sellOrders.reduce(
-            (sum, sell) => sum + sell.gainLoss,
-            0
-          );
+        }
+      : null,
+    lotDetails: holding.lots.map((lot) => {
+      const currentPrice = holding.currentPrice;
+      const unrealizedGainLoss =
+        currentPrice && lot.remainingQuantity > 0
+          ? lot.remainingQuantity * (currentPrice - lot.buyPrice)
+          : null;
+      const totalRealizedGainLoss = lot.sellOrders.reduce((sum, sell) => sum + sell.gainLoss, 0);
 
-          return {
-            buyDate: lot.buyDate,
-            buyPrice: lot.buyPrice,
-            originalBuyPrice: lot.originalBuyPrice,
-            quantity: lot.quantity,
-            originalQuantity: lot.originalQuantity,
-            remainingQuantity: lot.remainingQuantity,
-            totalCost: lot.totalCost,
-            splitRatio: lot.splitRatio,
-            sellOrders: lot.sellOrders.map(sell => ({
-              sellDate: sell.sellDate,
-              sellPrice: sell.sellPrice,
-              quantity: sell.quantity,
-              gainLoss: sell.gainLoss,
-              gainLossPercent: sell.gainLossPercent,
-            })),
-            realizedGainLoss: totalRealizedGainLoss,
-            unrealizedGainLoss: unrealizedGainLoss,
-          };
-        }),
+      return {
+        buyDate: lot.buyDate,
+        buyPrice: lot.buyPrice,
+        originalBuyPrice: lot.originalBuyPrice,
+        quantity: lot.quantity,
+        originalQuantity: lot.originalQuantity,
+        remainingQuantity: lot.remainingQuantity,
+        totalCost: lot.totalCost,
+        splitRatio: lot.splitRatio,
+        sellOrders: lot.sellOrders.map((sell) => ({
+          sellDate: sell.sellDate,
+          sellPrice: sell.sellPrice,
+          quantity: sell.quantity,
+          gainLoss: sell.gainLoss,
+          gainLossPercent: sell.gainLossPercent,
+        })),
+        realizedGainLoss: totalRealizedGainLoss,
+        unrealizedGainLoss,
       };
     }),
   };
+}
+
+/**
+ * Exports portfolio data in a structured format optimized for AI analysis
+ */
+export function exportAIMetadata(
+  holdings: Record<string, SecurityHolding>,
+  recommendations: Record<string, SecurityRecommendation>,
+  actionRanges: Record<string, ActionPriceRange>,
+  context: AIExportContext = {}
+): string {
+  const holdingsArray = Object.values(holdings).sort((a, b) =>
+    a.security.localeCompare(b.security)
+  );
+  const totalValue =
+    context.totalPortfolioValue ??
+    holdingsArray.reduce((sum, h) => sum + (h.marketValue || 0), 0);
+
+  const metadata = {
+    exportDate: new Date().toISOString(),
+    market: 'Colombo Stock Exchange (CSE), Sri Lanka — ATrad broker exports',
+    portfolioSummary: {
+      totalSecurities: holdingsArray.length,
+      totalPortfolioValue: totalValue,
+      totalCost: holdingsArray.reduce((sum, h) => sum + h.totalCost, 0),
+      totalUnrealizedGainLoss: holdingsArray.reduce(
+        (sum, h) => sum + (h.unrealizedGainLoss || 0),
+        0
+      ),
+      securitiesWithRecommendations: Object.keys(recommendations).length,
+    },
+    portfolioTrajectory: portfolioTrajectorySection(context.portfolioTrajectory),
+    watchlistOnlySecurities: watchlistOnlySecurities(holdings, context),
+    analysisGuidance: {
+      usePriceHistory:
+        'Each security includes priceHistory[] from manual watchlist uploads (sparse, not daily). Use trend direction, not statistical forecast.',
+      usePortfolioTrajectory:
+        'portfolioTrajectory shows total book value over snapshot dates from manual portfolio CSV uploads.',
+      concentration:
+        'Flag any single security above 15% of portfolio value. Note sector clustering (banks, conglomerates) if visible from symbols.',
+    },
+    securities: holdingsArray.map((holding) =>
+      mapSecurityForExport(
+        holding,
+        recommendations[holding.security],
+        actionRanges[holding.security],
+        context.priceHistoryBySecurity?.[holding.security],
+        totalValue
+      )
+    ),
+  };
 
   return JSON.stringify(metadata, null, 2);
+}
+
+function watchlistOnlySecurities(
+  holdings: Record<string, SecurityHolding>,
+  context: AIExportContext
+): string[] {
+  const held = new Set(Object.keys(holdings));
+  return Object.keys(context.priceHistoryBySecurity ?? {})
+    .filter((s) => !held.has(s))
+    .sort();
+}
+
+function appendPortfolioTrajectoryMarkdown(
+  lines: string[],
+  context: AIExportContext
+) {
+  const traj = portfolioTrajectorySection(context.portfolioTrajectory);
+  if (!traj) return;
+  lines.push('## Portfolio value over time (manual snapshots)');
+  lines.push('');
+  lines.push(
+    `- **Snapshots:** ${traj.snapshotCount} (${traj.firstSnapshot} → ${traj.latestSnapshot})`
+  );
+  if (traj.valueChangePercentSinceFirst != null) {
+    lines.push(`- **Change since first snapshot:** ${traj.valueChangePercentSinceFirst}%`);
+  }
+  lines.push('');
+  lines.push('| Date | Market value | Cost | Unrealized G/L |');
+  lines.push('|------|--------------|------|----------------|');
+  for (const p of traj.points) {
+    lines.push(
+      `| ${p.date} | ${p.totalMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2 })} | ${p.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 })} | ${p.totalUnrealizedGainLoss >= 0 ? '+' : ''}${p.totalUnrealizedGainLoss.toLocaleString('en-US', { minimumFractionDigits: 2 })} |`
+    );
+  }
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+}
+
+function appendPriceHistoryMarkdown(
+  lines: string[],
+  security: string,
+  context: AIExportContext
+) {
+  const history = sortedPriceHistory(context.priceHistoryBySecurity?.[security]);
+  if (!history.length) return;
+  const trend = priceHistoryTrendContext(history);
+  lines.push('**Watchlist price history (sparse uploads):**');
+  if (trend) lines.push(`- Trend: ${trend}`);
+  lines.push(
+    history
+      .map((p) => `${p.tradingDate}: ${p.lastPrice.toFixed(2)}`)
+      .join(' · ')
+  );
+  lines.push('');
 }
 
 /**
@@ -109,34 +274,54 @@ export function exportAIMarkdown(
   holdings: Record<string, SecurityHolding>,
   recommendations: Record<string, SecurityRecommendation>,
   actionRanges: Record<string, ActionPriceRange>,
-  totalPortfolioValue?: number
+  context: AIExportContext = {}
 ): string {
   const holdingsArray = Object.values(holdings).sort((a, b) =>
     a.security.localeCompare(b.security)
   );
 
-  const totalValue = totalPortfolioValue || holdingsArray.reduce((sum, h) => sum + (h.marketValue || 0), 0);
+  const totalValue =
+    context.totalPortfolioValue ??
+    holdingsArray.reduce((sum, h) => sum + (h.marketValue || 0), 0);
   const totalCost = holdingsArray.reduce((sum, h) => sum + h.totalCost, 0);
   const totalUnrealized = holdingsArray.reduce((sum, h) => sum + (h.unrealizedGainLoss || 0), 0);
 
   const lines: string[] = [];
-  
-  lines.push('# Stock Portfolio Analysis for AI Agent');
+
+  lines.push('# CSE portfolio analysis (ATrad / manual exports)');
   lines.push('');
   lines.push(`**Generated:** ${new Date().toLocaleString()}`);
   lines.push('');
-  lines.push('## Portfolio Summary');
+  lines.push(
+    '**Context:** Colombo Stock Exchange (CSE), Sri Lanka. Prices and portfolio totals come from periodic ATrad CSV/Excel exports — not live feeds. Do not forecast from sparse history; use direction and concentration only.'
+  );
   lines.push('');
-  lines.push(`- **Total Securities:** ${holdingsArray.length}`);
-  lines.push(`- **Total Portfolio Value:** ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-  lines.push(`- **Total Cost Basis:** ${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-  lines.push(`- **Total Unrealized Gain/Loss:** ${totalUnrealized >= 0 ? '+' : ''}${totalUnrealized.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-  lines.push(`- **Return %:** ${totalCost > 0 ? ((totalUnrealized / totalCost) * 100).toFixed(2) : 0}%`);
+  lines.push('## Portfolio summary');
   lines.push('');
-  lines.push('---');
+  lines.push(`- **Securities:** ${holdingsArray.length}`);
+  lines.push(
+    `- **Total value:** ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  );
+  lines.push(
+    `- **Cost basis:** ${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  );
+  lines.push(
+    `- **Unrealized G/L:** ${totalUnrealized >= 0 ? '+' : ''}${totalUnrealized.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${totalCost > 0 ? ((totalUnrealized / totalCost) * 100).toFixed(2) : '0'}%)`
+  );
   lines.push('');
+  appendPortfolioTrajectoryMarkdown(lines, context);
+  const watchOnly = watchlistOnlySecurities(holdings, context);
+  if (watchOnly.length > 0) {
+    lines.push('## Watchlist only (not in holdings)');
+    lines.push('');
+    for (const sym of watchOnly) {
+      lines.push(`### ${sym}`);
+      appendPriceHistoryMarkdown(lines, sym, context);
+    }
+    lines.push('---');
+    lines.push('');
+  }
 
-  // Group by recommendation
   const byRecommendation: Record<string, typeof holdingsArray> = {
     BUY_NEW: [],
     ADD_ACCUMULATE: [],
@@ -147,7 +332,7 @@ export function exportAIMarkdown(
     NO_RECOMMENDATION: [],
   };
 
-  holdingsArray.forEach(holding => {
+  holdingsArray.forEach((holding) => {
     const rec = recommendations[holding.security];
     if (rec) {
       byRecommendation[rec.recommendation].push(holding);
@@ -156,114 +341,146 @@ export function exportAIMarkdown(
     }
   });
 
-  // Priority recommendations first
-  const priorityOrder = ['EXIT', 'STRONG_STOP_TAKE_PROFIT', 'TRIM', 'BUY_NEW', 'ADD_ACCUMULATE', 'HOLD', 'NO_RECOMMENDATION'];
-  
+  const priorityOrder = [
+    'EXIT',
+    'STRONG_STOP_TAKE_PROFIT',
+    'TRIM',
+    'BUY_NEW',
+    'ADD_ACCUMULATE',
+    'HOLD',
+    'NO_RECOMMENDATION',
+  ];
+
   for (const recType of priorityOrder) {
     const securities = byRecommendation[recType];
     if (securities.length === 0) continue;
 
-    lines.push(`## ${recType.replace(/_/g, ' ')} (${securities.length} securities)`);
+    lines.push(`## ${recType.replace(/_/g, ' ')} (${securities.length})`);
     lines.push('');
 
     for (const holding of securities) {
       const recommendation = recommendations[holding.security];
       const actionRange = actionRanges[holding.security];
+      const stats = enrichLotStats(holding);
+      const positionPct =
+        totalValue > 0 && holding.marketValue != null
+          ? ((holding.marketValue / totalValue) * 100).toFixed(1)
+          : null;
 
       lines.push(`### ${holding.security}`);
       lines.push('');
-
-      // Current Position
-      lines.push('**Current Position:**');
+      if (positionPct) {
+        lines.push(`- **Portfolio weight:** ${positionPct}%${Number(positionPct) > 15 ? ' ⚠ concentration' : ''}`);
+      }
+      lines.push('**Position:**');
       lines.push(`- Quantity: ${holding.totalQuantity.toFixed(0)}`);
-      lines.push(`- Average Buy Price: ${holding.averageBuyPrice.toFixed(2)}`);
-      lines.push(`- Total Cost: ${holding.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+      lines.push(`- Avg buy: ${holding.averageBuyPrice.toFixed(2)}`);
+      lines.push(
+        `- Cost: ${holding.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      );
       if (holding.currentPrice) {
-        lines.push(`- Current Price: ${holding.currentPrice.toFixed(2)}`);
-        lines.push(`- Market Value: ${holding.marketValue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+        lines.push(`- Last price: ${holding.currentPrice.toFixed(2)}`);
+        lines.push(
+          `- Market value: ${holding.marketValue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        );
         if (holding.unrealizedGainLoss !== undefined) {
           const sign = holding.unrealizedGainLoss >= 0 ? '+' : '';
-          lines.push(`- Unrealized G/L: ${sign}${holding.unrealizedGainLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${holding.unrealizedGainLossPercent?.toFixed(2)}%)`);
+          lines.push(
+            `- Unrealized: ${sign}${holding.unrealizedGainLoss.toLocaleString('en-US', { minimumFractionDigits: 2 })} (${sign}${holding.unrealizedGainLossPercent?.toFixed(2)}%)`
+          );
         }
       }
+      if (stats.openLotCount > 0) {
+        lines.push(
+          `- Open lots: ${stats.openLotCount} (${stats.lotsInProfit} in profit, ${stats.lotsInLoss} in loss)${stats.lastBuyDate ? `; last buy ${stats.lastBuyDate}` : ''}`
+        );
+      }
       lines.push('');
+      appendPriceHistoryMarkdown(lines, holding.security, context);
 
-      // Lot Details - This is the key information for AI analysis
       if (holding.lots.length > 0) {
-        lines.push('**Lot Details (Transaction History):**');
+        lines.push('**Lots:**');
         lines.push('');
-        lines.push('| Buy Date | Buy Price | Quantity | Remaining | Total Cost | Sell Details | Realized G/L | Unrealized G/L |');
-        lines.push('|----------|-----------|----------|-----------|------------|--------------|--------------|----------------|');
-        
+        lines.push(
+          '| Buy date | Price | Qty | Remaining | Cost | Sells | Realized | Unrealized |'
+        );
+        lines.push('|----------|-------|-----|-----------|------|-------|----------|------------|');
+
         for (const lot of holding.lots) {
-          const totalRealizedGainLoss = lot.sellOrders.reduce(
-            (sum, sell) => sum + sell.gainLoss,
-            0
-          );
+          const totalRealizedGainLoss = lot.sellOrders.reduce((sum, sell) => sum + sell.gainLoss, 0);
           const currentPrice = holding.currentPrice;
           const unrealizedGainLoss =
             currentPrice && lot.remainingQuantity > 0
               ? lot.remainingQuantity * (currentPrice - lot.buyPrice)
               : null;
 
-          const buyPriceStr = lot.originalBuyPrice && lot.originalBuyPrice !== lot.buyPrice
-            ? `${lot.buyPrice.toFixed(2)} (was ${lot.originalBuyPrice.toFixed(2)})`
-            : lot.buyPrice.toFixed(2);
-          
-          const qtyStr = lot.originalQuantity && lot.originalQuantity !== lot.quantity
-            ? `${lot.quantity.toFixed(0)} (was ${lot.originalQuantity})`
-            : lot.quantity.toFixed(0);
+          const buyPriceStr =
+            lot.originalBuyPrice && lot.originalBuyPrice !== lot.buyPrice
+              ? `${lot.buyPrice.toFixed(2)} (was ${lot.originalBuyPrice.toFixed(2)})`
+              : lot.buyPrice.toFixed(2);
 
-          const splitInfo = lot.splitRatio && lot.splitRatio !== 1
-            ? ` ${lot.splitRatio.toFixed(2)}x split`
-            : '';
+          const qtyStr =
+            lot.originalQuantity && lot.originalQuantity !== lot.quantity
+              ? `${lot.quantity.toFixed(0)} (was ${lot.originalQuantity})`
+              : lot.quantity.toFixed(0);
 
-          let sellDetails = 'Not sold';
+          const splitInfo =
+            lot.splitRatio && lot.splitRatio !== 1 ? ` ${lot.splitRatio.toFixed(2)}x` : '';
+
+          let sellDetails = '—';
           if (lot.sellOrders.length > 0) {
-            sellDetails = lot.sellOrders.map(sell => 
-              `${sell.quantity} @ ${sell.sellPrice.toFixed(2)} on ${sell.sellDate} (${sell.gainLoss >= 0 ? '+' : ''}${sell.gainLoss.toFixed(2)}, ${sell.gainLossPercent >= 0 ? '+' : ''}${sell.gainLossPercent.toFixed(2)}%)`
-            ).join('; ');
+            sellDetails = lot.sellOrders
+              .map(
+                (sell) =>
+                  `${sell.quantity}@${sell.sellPrice.toFixed(2)} ${sell.sellDate} (${sell.gainLoss >= 0 ? '+' : ''}${sell.gainLoss.toFixed(2)})`
+              )
+              .join('; ');
           }
 
-          const realizedStr = totalRealizedGainLoss !== 0
-            ? `${totalRealizedGainLoss >= 0 ? '+' : ''}${totalRealizedGainLoss.toFixed(2)}`
-            : '-';
+          const realizedStr =
+            totalRealizedGainLoss !== 0
+              ? `${totalRealizedGainLoss >= 0 ? '+' : ''}${totalRealizedGainLoss.toFixed(2)}`
+              : '—';
+          const unrealizedStr =
+            unrealizedGainLoss !== null
+              ? `${unrealizedGainLoss >= 0 ? '+' : ''}${unrealizedGainLoss.toFixed(2)}`
+              : '—';
 
-          const unrealizedStr = unrealizedGainLoss !== null
-            ? `${unrealizedGainLoss >= 0 ? '+' : ''}${unrealizedGainLoss.toFixed(2)}`
-            : '-';
-
-          lines.push([
-            lot.buyDate + splitInfo,
-            buyPriceStr,
-            qtyStr,
-            lot.remainingQuantity > 0 ? lot.remainingQuantity.toFixed(0) : 'Sold',
-            lot.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            sellDetails,
-            realizedStr,
-            unrealizedStr,
-          ].join(' | '));
+          lines.push(
+            [
+              lot.buyDate + splitInfo,
+              buyPriceStr,
+              qtyStr,
+              lot.remainingQuantity > 0 ? lot.remainingQuantity.toFixed(0) : 'Sold',
+              lot.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+              sellDetails,
+              realizedStr,
+              unrealizedStr,
+            ].join(' | ')
+          );
         }
         lines.push('');
       }
 
-      // Action Price Ranges
       if (actionRange) {
-        lines.push('**Action Price Ranges:**');
-        if (actionRange.strongAddZone) lines.push(`- Strong Add Zone: ${actionRange.strongAddZone}`);
-        if (actionRange.accumulateSlowly) lines.push(`- Accumulate Slowly: ${actionRange.accumulateSlowly}`);
-        if (actionRange.pauseBuys) lines.push(`- Pause Buys: ${actionRange.pauseBuys}`);
-        if (actionRange.trimSmallPortion) lines.push(`- Trim Small Portion: ${actionRange.trimSmallPortion}`);
-        if (actionRange.reEvaluateIfWeak) lines.push(`- Re-evaluate if Market Weak: ${actionRange.reEvaluateIfWeak}`);
-        if (actionRange.trailingStop) lines.push(`- Trailing Stop (SELL if below): ${actionRange.trailingStop.toFixed(2)}`);
+        lines.push('**Action ranges:**');
+        if (actionRange.strongAddZone) lines.push(`- Strong add: ${actionRange.strongAddZone}`);
+        if (actionRange.accumulateSlowly)
+          lines.push(`- Accumulate: ${actionRange.accumulateSlowly}`);
+        if (actionRange.pauseBuys) lines.push(`- Pause buys: ${actionRange.pauseBuys}`);
+        if (actionRange.trimSmallPortion)
+          lines.push(`- Trim: ${actionRange.trimSmallPortion}`);
+        if (actionRange.reEvaluateIfWeak)
+          lines.push(`- Re-evaluate if weak: ${actionRange.reEvaluateIfWeak}`);
+        if (actionRange.trailingStop)
+          lines.push(`- Trailing stop: ${actionRange.trailingStop.toFixed(2)}`);
         lines.push('');
       }
 
-      // Recommendation
       if (recommendation) {
         lines.push(`**Recommendation:** ${recommendation.recommendation.replace(/_/g, ' ')}`);
-        lines.push(`- **Confidence:** ${recommendation.confidence}`);
-        lines.push(`- **Reason:** ${recommendation.reason}`);
+        lines.push(`- Confidence: ${recommendation.confidence}`);
+        lines.push(`- Reason: ${recommendation.reason}`);
         lines.push('');
       }
 
@@ -272,94 +489,71 @@ export function exportAIMarkdown(
     }
   }
 
-  // Add analysis prompt
-  lines.push('## Analysis Request');
+  lines.push('## Analysis request');
   lines.push('');
-  lines.push('Please analyze this portfolio and provide:');
+  lines.push('Analyze this CSE portfolio given sparse manual data only (no ML/forecast):');
   lines.push('');
-  lines.push('1. **Overall Assessment:** Evaluate the portfolio health and risk level');
-  lines.push('2. **Action Recommendations:** Review each security recommendation and provide detailed reasoning');
-  lines.push('3. **Risk Management:** Identify any high-risk positions or concentration issues');
-  lines.push('4. **Optimization Suggestions:** Recommend portfolio adjustments for better risk-adjusted returns');
-  lines.push('5. **Market Context:** Consider current market conditions and provide strategic advice');
+  lines.push('1. **Health & risk** — concentration (>15% single name), sector overlap, losers vs winners');
+  lines.push('2. **Actions** — validate each recommendation against lots, cost basis, and watchlist trend');
+  lines.push('3. **Zones** — whether action price ranges align with history and unrealized P/L');
+  lines.push('4. **Trajectory** — comment on portfolio snapshot trend if provided');
+  lines.push('5. **Watchlist-only** — flag symbols in price history but not in holdings (if any)');
   lines.push('');
 
   return lines.join('\n');
 }
 
 /**
- * Exports portfolio data specifically for AI to generate Action Price Ranges CSV
- * This export includes detailed instructions and examples for the AI to create the CSV
+ * Exports portfolio data for AI to generate Action Price Ranges CSV
  */
 export function exportAIMetadataForActionRanges(
   holdings: Record<string, SecurityHolding>,
-  totalPortfolioValue?: number
+  context: AIExportContext = {}
 ): string {
   const holdingsArray = Object.values(holdings).sort((a, b) =>
     a.security.localeCompare(b.security)
   );
 
-  const totalValue = totalPortfolioValue || holdingsArray.reduce((sum, h) => sum + (h.marketValue || 0), 0);
+  const totalValue =
+    context.totalPortfolioValue ??
+    holdingsArray.reduce((sum, h) => sum + (h.marketValue || 0), 0);
   const totalCost = holdingsArray.reduce((sum, h) => sum + h.totalCost, 0);
 
   const metadata = {
     exportDate: new Date().toISOString(),
-    purpose: "Generate Action Price Ranges CSV for portfolio management",
+    market: 'Colombo Stock Exchange (CSE), Sri Lanka — ATrad',
+    purpose: 'Generate Action Price Ranges CSV for portfolio management',
+    portfolioTrajectory: portfolioTrajectorySection(context.portfolioTrajectory),
     instructions: {
-      task: "Based on the portfolio data below, generate a CSV file with Action Price Ranges for each security. The CSV should follow the exact format specified.",
+      task: 'Generate a CSV with Action Price Ranges per security. Use watchlist priceHistory where present; ranges should respect CSE tick sizes and current unrealized P/L.',
       csvFormat: {
-        headers: "Company Code,Quantity,Avg Price,B.E.S Price,Last,Change,% Change,Accumulate Slowly,Strong Add Zone,Re-evaluate if Market Weak,Pause Buys,Trim Small Portion,Investment_Percentage,Time,Trailing Stop (SELL if below)",
-        description: {
-          "Company Code": "Security symbol (e.g., ACL.N0000)",
-          "Quantity": "Current holding quantity",
-          "Avg Price": "Average buy price from currentPosition.averageBuyPrice",
-          "B.E.S Price": "Break-even sell price (usually avg price + 1-2% buffer for commissions)",
-          "Last": "Current/last price from currentPosition.currentPrice",
-          "Change": "Price change amount (can be 0 if not available)",
-          "% Change": "Price change percentage (can be 0 if not available)",
-          "Accumulate Slowly": "Price range for gradual accumulation (format: '245–250' or 'Below 230')",
-          "Strong Add Zone": "Best price range for aggressive buying (format: '235–240')",
-          "Re-evaluate if Market Weak": "Price threshold to reconsider position (format: 'Below 230')",
-          "Pause Buys": "Price range where buying should pause (format: '260–270')",
-          "Trim Small Portion": "Price level to start taking profits (format: '280+')",
-          "Investment_Percentage": "Percentage of portfolio in this security (calculate from marketValue/totalPortfolioValue)",
-          "Time": "Current timestamp (format: HH:MM:SS.microseconds)",
-          "Trailing Stop (SELL if below)": "Stop loss price level (number only, no text)"
-        },
-        priceRangeFormats: [
-          "Range format: '245–250' (use en-dash or hyphen between numbers)",
-          "Above threshold: '280+' (use plus sign)",
-          "Below threshold: 'Below 230' (use 'Below' prefix)",
-          "Single value: '250' (just the number)"
-        ],
-        calculationGuidelines: {
-          "Strong Add Zone": "If unrealizedGainLossPercent > 0: 10-20% below current price. If loss: near support levels (5-10% below avg price)",
-          "Accumulate Slowly": "5-10% below current price, good entry zone for adding",
-          "Pause Buys": "10-15% above current price, consider pausing new purchases",
-          "Trim Small Portion": "20-30% above current price, take partial profits",
-          "Re-evaluate if Market Weak": "15-25% below current price, critical support level",
-          "Trailing Stop": "If profit: 5-10% below current price. If loss: at break-even or 2-3% below avg price"
-        }
+        headers:
+          'Company Code,Quantity,Avg Price,B.E.S Price,Last,Change,% Change,Accumulate Slowly,Strong Add Zone,Re-evaluate if Market Weak,Pause Buys,Trim Small Portion,Investment_Percentage,Time,Trailing Stop (SELL if below)',
       },
-      outputFormat: "Return ONLY the CSV content with header row and one row per security. Do not include any explanations or markdown formatting, just the raw CSV."
+      outputFormat:
+        'Return ONLY raw CSV (header + one row per security). No markdown or commentary.',
     },
     portfolioSummary: {
       totalSecurities: holdingsArray.length,
       totalPortfolioValue: totalValue,
-      totalCost: totalCost,
-      totalUnrealizedGainLoss: holdingsArray.reduce((sum, h) => sum + (h.unrealizedGainLoss || 0), 0),
+      totalCost,
+      totalUnrealizedGainLoss: holdingsArray.reduce(
+        (sum, h) => sum + (h.unrealizedGainLoss || 0),
+        0
+      ),
     },
-    securities: holdingsArray.map(holding => {
-      const realizedGainLoss = holding.lots.reduce((sum, lot) => {
-        return sum + lot.sellOrders.reduce((s, sell) => s + sell.gainLoss, 0);
-      }, 0);
-
-      const investmentPercentage = totalValue > 0
-        ? ((holding.marketValue || holding.totalCost) / totalValue * 100)
-        : 0;
+    securities: holdingsArray.map((holding) => {
+      const history = sortedPriceHistory(
+        context.priceHistoryBySecurity?.[holding.security]
+      );
+      const investmentPercentage =
+        totalValue > 0 ? ((holding.marketValue || holding.totalCost) / totalValue) * 100 : 0;
 
       return {
         security: holding.security,
+        investmentPercentage,
+        priceHistory: formatPriceHistoryBlock(history),
+        priceTrendSummary: history.length ? priceHistoryTrendContext(history) : null,
         currentPosition: {
           quantity: holding.totalQuantity,
           averageBuyPrice: holding.averageBuyPrice,
@@ -368,38 +562,37 @@ export function exportAIMetadataForActionRanges(
           marketValue: holding.marketValue,
           unrealizedGainLoss: holding.unrealizedGainLoss,
           unrealizedGainLossPercent: holding.unrealizedGainLossPercent,
-          realizedGainLoss: realizedGainLoss,
         },
-        priceHistory: holding.lots.map(lot => ({
-          buyDate: lot.buyDate,
-          buyPrice: lot.buyPrice,
-          quantity: lot.quantity,
-        })),
-        investmentPercentage: investmentPercentage,
-        // Helper calculations for AI
-        breakEvenSellPrice: holding.averageBuyPrice * 1.01, // 1% buffer for commissions
+        breakEvenSellPrice: holding.averageBuyPrice * 1.01,
         suggestedZones: {
-          strongAddZone: holding.currentPrice && holding.unrealizedGainLossPercent && holding.unrealizedGainLossPercent > 0
-            ? `${(holding.currentPrice * 0.85).toFixed(2)}–${(holding.currentPrice * 0.90).toFixed(2)}`
-            : holding.currentPrice
-              ? `${(holding.averageBuyPrice * 0.90).toFixed(2)}–${(holding.averageBuyPrice * 0.95).toFixed(2)}`
-              : undefined,
+          strongAddZone:
+            holding.currentPrice &&
+            holding.unrealizedGainLossPercent &&
+            holding.unrealizedGainLossPercent > 0
+              ? `${(holding.currentPrice * 0.85).toFixed(2)}–${(holding.currentPrice * 0.9).toFixed(2)}`
+              : holding.currentPrice
+                ? `${(holding.averageBuyPrice * 0.9).toFixed(2)}–${(holding.averageBuyPrice * 0.95).toFixed(2)}`
+                : undefined,
           accumulateSlowly: holding.currentPrice
-            ? `${(holding.currentPrice * 0.90).toFixed(2)}–${(holding.currentPrice * 0.95).toFixed(2)}`
+            ? `${(holding.currentPrice * 0.9).toFixed(2)}–${(holding.currentPrice * 0.95).toFixed(2)}`
             : undefined,
           pauseBuys: holding.currentPrice
-            ? `${(holding.currentPrice * 1.10).toFixed(2)}–${(holding.currentPrice * 1.15).toFixed(2)}`
+            ? `${(holding.currentPrice * 1.1).toFixed(2)}–${(holding.currentPrice * 1.15).toFixed(2)}`
             : undefined,
           trimSmallPortion: holding.currentPrice
-            ? `${(holding.currentPrice * 1.20).toFixed(2)}+`
+            ? `${(holding.currentPrice * 1.2).toFixed(2)}+`
             : undefined,
-          trailingStop: holding.currentPrice && holding.unrealizedGainLossPercent && holding.unrealizedGainLossPercent > 0
-            ? holding.currentPrice * 0.90
-            : holding.averageBuyPrice * 0.98,
-        }
+          trailingStop:
+            holding.currentPrice &&
+            holding.unrealizedGainLossPercent &&
+            holding.unrealizedGainLossPercent > 0
+              ? holding.currentPrice * 0.9
+              : holding.averageBuyPrice * 0.98,
+        },
       };
     }),
-    exampleCSVRow: "ACL.N0000,380,73.74,74.56,107.00,1.75,1.66,95-100,85-90,Below 80,115-120,130+,5.80%,13:29:03.301165,95",
+    exampleCSVRow:
+      'ACL.N0000,380,73.74,74.56,107.00,1.75,1.66,95-100,85-90,Below 80,115-120,130+,5.80%,13:29:03.301165,95',
   };
 
   return JSON.stringify(metadata, null, 2);

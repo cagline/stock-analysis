@@ -29,6 +29,7 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Snackbar,
 } from '@mui/material';
 import {
   CloudUpload as CloudUploadIcon,
@@ -50,6 +51,7 @@ import {
   ExitToApp as ExitIcon,
   StopCircle as StopIcon,
   Psychology as AIIcon,
+  ContentCopy as CopyIcon,
 } from '@mui/icons-material';
 import { usePortfolioController } from './usePortfolioController';
 import type { SecurityHolding, StockSplit } from './types';
@@ -86,6 +88,10 @@ const PortfolioPage: React.FC = () => {
     aiExportMenuAnchor,
     setAiExportMenuAnchor,
     uploading,
+    watchlistTradingDate,
+    setWatchlistTradingDate,
+    portfolioSnapshotDate,
+    setPortfolioSnapshotDate,
     handleFileUpload,
     handleWatchlistUpload,
     handlePortfolioUpload,
@@ -103,10 +109,20 @@ const PortfolioPage: React.FC = () => {
     handleExportAIActionRanges,
     handleExportAIMetadata,
     handleExportAIMarkdown,
+    handleCopyAIMarkdown,
+    aiCopySnackOpen,
+    setAiCopySnackOpen,
   } = controller;
 
   return (
     <Container maxWidth={false} sx={{ py: 4, px: { xs: 2, sm: 3, md: 4 }, maxWidth: '1920px', width: '100%' }}>
+      <Snackbar
+        open={aiCopySnackOpen}
+        autoHideDuration={4000}
+        onClose={() => setAiCopySnackOpen(false)}
+        message="Analysis copied to clipboard — paste into your AI chat"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
       {/* CSV Upload Section */}
       <Card sx={{ mb: 4 }}>
         <CardContent>
@@ -145,7 +161,17 @@ const PortfolioPage: React.FC = () => {
             </Box>
 
             {/* Watchlist Upload */}
-            <Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <TextField
+                label="Trading date"
+                type="date"
+                size="small"
+                value={watchlistTradingDate}
+                onChange={(e) => setWatchlistTradingDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                helperText="Defaults to the file's saved date on upload. Edit before uploading to override."
+                sx={{ maxWidth: 280 }}
+              />
               <Box
                 component="input"
                 accept=".csv"
@@ -175,11 +201,21 @@ const PortfolioPage: React.FC = () => {
               </label>
             </Box>
 
-            {/* Portfolio CSV Upload */}
-            <Box>
+            {/* Portfolio CSV/XLSX Upload */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <TextField
+                label="Snapshot date"
+                type="date"
+                size="small"
+                value={portfolioSnapshotDate}
+                onChange={(e) => setPortfolioSnapshotDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                helperText="Defaults to the file's saved date on upload. Edit before uploading to override."
+                sx={{ maxWidth: 280 }}
+              />
               <Box
                 component="input"
-                accept=".csv"
+                accept=".csv,.xlsx,.xls"
                 sx={{ display: 'none' }}
                 id="portfolio-upload-input"
                 type="file"
@@ -200,7 +236,7 @@ const PortfolioPage: React.FC = () => {
                       Uploading...
                     </Box>
                   ) : (
-                    'Upload Portfolio CSV'
+                    'Upload Portfolio CSV / Excel'
                   )}
                 </Button>
               </label>
@@ -390,6 +426,7 @@ const PortfolioPage: React.FC = () => {
               onExportAIActionRanges={handleExportAIActionRanges}
               onExportAIMetadata={handleExportAIMetadata}
               onExportAIMarkdown={handleExportAIMarkdown}
+              onCopyAIMarkdown={handleCopyAIMarkdown}
               onSetPrice={openPriceDialog}
             />
           )}
@@ -573,6 +610,7 @@ const HoldingsOverview: React.FC<{
   onExportAIActionRanges: () => void;
   onExportAIMetadata: () => void;
   onExportAIMarkdown: () => void;
+  onCopyAIMarkdown: () => void;
   onSetPrice: (security: string, currentPrice?: number) => void;
 }> = ({
   holdingsArray,
@@ -583,6 +621,7 @@ const HoldingsOverview: React.FC<{
   onExportAIActionRanges,
   onExportAIMetadata,
   onExportAIMarkdown,
+  onCopyAIMarkdown,
   onSetPrice,
 }) => (
   <Card sx={{ mb: 4 }}>
@@ -605,6 +644,10 @@ const HoldingsOverview: React.FC<{
           <MenuItem onClick={onExportAIMarkdown}>
             <MarkdownIcon sx={{ mr: 1 }} fontSize="small" />
             Export Full Analysis (Markdown)
+          </MenuItem>
+          <MenuItem onClick={onCopyAIMarkdown}>
+            <CopyIcon sx={{ mr: 1 }} fontSize="small" />
+            Copy analysis to clipboard
           </MenuItem>
         </Menu>
       </Box>

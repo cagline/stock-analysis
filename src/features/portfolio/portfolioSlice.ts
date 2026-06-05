@@ -3,8 +3,9 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../../store/store';
 import type { Order, Lot, SecurityHolding, StockSplit, ActionPriceRange } from './types';
 import { processOrdersIntoLots, calculateHoldings } from './utils/lotTracker';
+import { orderDedupeKey } from './utils/orderDedupeKey';
 
-export interface PortfolioState {
+interface PortfolioSliceState {
   orders: Order[];
   lots: Lot[];
   holdings: Record<string, SecurityHolding>;
@@ -15,7 +16,7 @@ export interface PortfolioState {
   error: string | null;
 }
 
-const initialState: PortfolioState = {
+const initialState: PortfolioSliceState = {
   orders: [],
   lots: [],
   holdings: {},
@@ -38,10 +39,7 @@ const portfolioSlice = createSlice({
     },
     /** Merge uploaded orders with existing: same executionId (or exchangeOrderId+date+time) = override, else add. No duplicates. */
     mergeOrders: (state, action: PayloadAction<Order[]>) => {
-      const key = (o: Order) =>
-        o.executionId
-          ? o.executionId
-          : `${o.exchangeOrderId || o.id}|${o.orderDate}|${o.orderTime || ''}`;
+      const key = orderDedupeKey;
       const merged: Order[] = [...state.orders];
       for (const order of action.payload) {
         const k = key(order);

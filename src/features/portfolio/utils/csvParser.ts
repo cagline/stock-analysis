@@ -163,17 +163,23 @@ function parseNumber(value: string): number {
 }
 
 /**
- * Parses a Watchlist CSV file from ATrad
- * Extracts Security -> Last Price mapping
+ * One row from an ATrad Watchlist CSV export.
  */
-export function parseWatchlistCSV(csvText: string): Record<string, number> {
-  const lines = csvText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-  
-  if (lines.length < 2) {
-    throw new Error('Invalid Watchlist CSV format: Expected at least header and data rows');
-  }
+export type WatchlistRow = {
+  security: string;
+  lastPrice: number;
+  bidPrice?: number;
+  askPrice?: number;
+  highPrice?: number;
+  lowPrice?: number;
+  volume?: number;
+  turnover?: number;
+  changeAmount?: number;
+  changePercent?: number;
+  time?: string;
+};
 
-  // Find the header row (usually first line)
+function findWatchlistHeader(lines: string[]): { headerIndex: number; headers: string[] } {
   let headerIndex = -1;
   for (let i = 0; i < Math.min(3, lines.length); i++) {
     if (lines[i].includes('Security') && lines[i].includes('Last')) {
@@ -186,39 +192,311 @@ export function parseWatchlistCSV(csvText: string): Record<string, number> {
     throw new Error('Invalid Watchlist CSV format: Could not find header row with Security and Last columns');
   }
 
-  const headerLine = lines[headerIndex];
-  const headers = parseCSVLine(headerLine);
+  return { headerIndex, headers: parseCSVLine(lines[headerIndex]) };
+}
 
-  // Find column indices
-  const securityIndex = headers.findIndex(h => h.toLowerCase().includes('security'));
-  const lastPriceIndex = headers.findIndex(h => h.toLowerCase().includes('last'));
+function findColumnIndex(headers: string[], ...patterns: string[]): number {
+  for (const pattern of patterns) {
+    const idx = headers.findIndex((h) => h.toLowerCase().includes(pattern.toLowerCase()));
+    if (idx >= 0) return idx;
+  }
+  return -1;
+}
+
+/**
+ * Parses a Watchlist CSV file from ATrad — full row data for history storage.
+ */
+export function parseWatchlistRows(csvText: string): WatchlistRow[] {
+  const lines = csvText.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
+
+  if (lines.length < 2) {
+    throw new Error('Invalid Watchlist CSV format: Expected at least header and data rows');
+  }
+
+  const { headerIndex, headers } = findWatchlistHeader(lines);
+
+  const securityIndex = findColumnIndex(headers, 'security');
+  const lastPriceIndex = findColumnIndex(headers, 'last');
+  const bidPriceIndex = findColumnIndex(headers, 'bid price');
+  const askPriceIndex = findColumnIndex(headers, 'ask price');
+  const highIndex = findColumnIndex(headers, 'high');
+  const lowIndex = findColumnIndex(headers, 'low');
+  const volumeIndex = findColumnIndex(headers, 'volume');
+  const turnoverIndex = findColumnIndex(headers, 'turnover');
+  const changeIndex = findColumnIndex(headers, 'change');
+  const changePercentIndex = headers.findIndex(
+    (h) => h.toLowerCase().includes('% change') || h.toLowerCase().includes('change %')
+  );
+  const timeIndex = findColumnIndex(headers, 'time');
 
   if (securityIndex === -1 || lastPriceIndex === -1) {
     throw new Error('Invalid Watchlist CSV format: Missing Security or Last columns');
   }
 
-  const priceMap: Record<string, number> = {};
+  const rows: WatchlistRow[] = [];
 
-  // Process data rows (starting after header)
   for (let i = headerIndex + 1; i < lines.length; i++) {
     const line = lines[i];
     if (!line || line.trim().length === 0) continue;
 
     const values = parseCSVLine(line);
-    
-    if (values.length < Math.max(securityIndex, lastPriceIndex) + 1) {
-      continue; // Skip incomplete rows
-    }
+    if (values.length < Math.max(securityIndex, lastPriceIndex) + 1) continue;
 
     const security = values[securityIndex]?.trim();
     const lastPrice = parseNumber(values[lastPriceIndex] || '0');
+    if (!security || lastPrice <= 0) continue;
 
-    if (security && lastPrice > 0) {
-      priceMap[security] = lastPrice;
+    const row: WatchlistRow = { security, lastPrice };
+
+    if (bidPriceIndex >= 0) {
+      const v = parseNumber(values[bidPriceIndex] || '0');
+      if (v > 0) row.bidPrice = v;
+    }
+    if (askPriceIndex >= 0) {
+      const v = parseNumber(values[askPriceIndex] || '0');
+      if (v > 0) row.askPrice = v;
+    }
+    if (highIndex >= 0) {
+      const v = parseNumber(values[highIndex] || '0');
+      if (v > 0) row.highPrice = v;
+    }
+    if (lowIndex >= 0) {
+      const v = parseNumber(values[lowIndex] || '0');
+      if (v > 0) row.lowPrice = v;
+    }
+    if (volumeIndex >= 0) {
+      const v = parseNumber(values[volumeIndex] || '0');
+      if (v > 0) row.volume = v;
+    }
+    if (turnoverIndex >= 0) {
+      const v = parseNumber(values[turnoverIndex] || '0');
+      if (v > 0) row.turnover = v;
+    }
+    if (changeIndex >= 0) {
+      const raw = values[changeIndex]?.trim();
+      if (raw) row.changeAmount = parseNumber(raw);
+    }
+    if (changePercentIndex >= 0) {
+      const raw = values[changePercentIndex]?.replace(/%/g, '').trim();
+      if (raw) row.changePercent = parseNumber(raw);
+    }
+    if (timeIndex >= 0) {
+      const t = values[timeIndex]?.trim();
+      if (t) row.time = t;
+    }
+
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+/**
+ * Parses a Watchlist CSV file from ATrad
+ * Extracts Security -> Last Price mapping
+ */
+export function parseWatchlistCSV(csvText: string): Record<string, number> {
+  const rows = parseWatchlistRows(csvText);
+  const priceMap: Record<string, number> = {};
+  for (const row of rows) {
+    priceMap[row.security] = row.lastPrice;
+  }
+  return priceMap;
+}
+
+/**
+ * One row from an ATrad Portfolio CSV/XLSX export.
+ */
+export type PortfolioRow = {
+  security: string;
+  quantity?: number;
+  clearedBalance?: number;
+  availableBalance?: number;
+  unsettledBuy?: number;
+  unsettledSell?: number;
+  holdingPctQty?: number;
+  avgPrice?: number;
+  besPrice?: number;
+  totalCost?: number;
+  tradedPrice?: number;
+  marketValue?: number;
+  holdingPctMarketValue?: number;
+  salesCommission: number;
+  salesProceeds: number;
+  unrealizedGainLoss?: number;
+  unrealizedGainLossPct?: number;
+  unrealizedTodayGainLoss?: number;
+};
+
+function findPortfolioHeader(lines: string[]): { headerIndex: number; headers: string[] } {
+  let headerIndex = -1;
+  for (let i = 0; i < Math.min(8, lines.length); i++) {
+    if (
+      lines[i].includes('Security') &&
+      lines[i].includes('Sales Commission') &&
+      lines[i].includes('Sales Proceeds')
+    ) {
+      headerIndex = i;
+      break;
     }
   }
 
-  return priceMap;
+  if (headerIndex === -1) {
+    throw new Error('Invalid Portfolio format: Could not find header row');
+  }
+
+  return { headerIndex, headers: parseCSVLine(lines[headerIndex]) };
+}
+
+function portfolioCol(headers: string[], ...patterns: string[]): number {
+  for (const pattern of patterns) {
+    const idx = headers.findIndex((h) => h.toLowerCase().includes(pattern.toLowerCase()));
+    if (idx >= 0) return idx;
+  }
+  return -1;
+}
+
+function optionalField(values: string[], index: number): number | undefined {
+  if (index < 0) return undefined;
+  const v = parseNumber(values[index] || '0');
+  return Number.isFinite(v) ? v : undefined;
+}
+
+/**
+ * Parses a Portfolio CSV text (from .csv or converted .xlsx) — full row data.
+ */
+export function parsePortfolioRows(csvText: string): PortfolioRow[] {
+  const lines = csvText.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
+
+  if (lines.length < 3) {
+    throw new Error('Invalid Portfolio format: Expected at least header and data rows');
+  }
+
+  const { headerIndex, headers } = findPortfolioHeader(lines);
+
+  const securityIndex = portfolioCol(headers, 'security');
+  const quantityIndex = portfolioCol(headers, 'quantity');
+  const clearedIndex = portfolioCol(headers, 'cleared balance');
+  const availableIndex = portfolioCol(headers, 'available balance');
+  const unsettledBuyIndex = portfolioCol(headers, 'unsettled buy');
+  const unsettledSellIndex = portfolioCol(headers, 'unsettled sell');
+  const holdingPctQtyIndex = portfolioCol(headers, 'holding % (quantity)');
+  const avgPriceIndex = portfolioCol(headers, 'avg price');
+  const besPriceIndex = portfolioCol(headers, 'b.e.s price', 'bes price');
+  const totalCostIndex = portfolioCol(headers, 'total cost');
+  const tradedPriceIndex = portfolioCol(headers, 'traded price');
+  const marketValueIndex = portfolioCol(headers, 'market value');
+  const holdingPctMvIndex = portfolioCol(headers, 'holding % (market value)');
+  const salesCommissionIndex = portfolioCol(headers, 'sales commission');
+  const salesProceedsIndex = portfolioCol(headers, 'sales proceeds');
+  const unrealizedIndex = headers.findIndex(
+    (h) =>
+      h.toLowerCase().includes('unrealized gain') &&
+      !h.toLowerCase().includes('%') &&
+      !h.toLowerCase().includes('today')
+  );
+  const unrealizedPctIndex = headers.findIndex(
+    (h) =>
+      h.toLowerCase().includes('unrealized gain') && h.toLowerCase().includes('%')
+  );
+  const unrealizedTodayIndex = portfolioCol(headers, 'unr today');
+
+  if (securityIndex === -1 || salesCommissionIndex === -1 || salesProceedsIndex === -1) {
+    throw new Error('Invalid Portfolio format: Missing required columns');
+  }
+
+  const rows: PortfolioRow[] = [];
+
+  for (let i = headerIndex + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line || line.trim().length === 0) continue;
+    if (line.toUpperCase().startsWith('TOTAL')) continue;
+
+    const values = parseCSVLine(line);
+    if (values.length < Math.max(securityIndex, salesCommissionIndex, salesProceedsIndex) + 1) {
+      continue;
+    }
+
+    const security = values[securityIndex]?.trim();
+    if (!security) continue;
+
+    const salesCommission = parseNumber(values[salesCommissionIndex] || '0');
+    const salesProceeds = parseNumber(values[salesProceedsIndex] || '0');
+    const quantity = optionalField(values, quantityIndex);
+    const marketValue = optionalField(values, marketValueIndex);
+
+    if (
+      (quantity == null || quantity <= 0) &&
+      (marketValue == null || marketValue <= 0) &&
+      salesCommission <= 0 &&
+      salesProceeds <= 0
+    ) {
+      continue;
+    }
+
+    const row: PortfolioRow = {
+      security,
+      salesCommission,
+      salesProceeds,
+    };
+
+    if (quantity != null) row.quantity = quantity;
+    const cleared = optionalField(values, clearedIndex);
+    if (cleared != null) row.clearedBalance = cleared;
+    const available = optionalField(values, availableIndex);
+    if (available != null) row.availableBalance = available;
+    const ub = optionalField(values, unsettledBuyIndex);
+    if (ub != null) row.unsettledBuy = ub;
+    const us = optionalField(values, unsettledSellIndex);
+    if (us != null) row.unsettledSell = us;
+    const hpq = optionalField(values, holdingPctQtyIndex);
+    if (hpq != null) row.holdingPctQty = hpq;
+    const avg = optionalField(values, avgPriceIndex);
+    if (avg != null) row.avgPrice = avg;
+    const bes = optionalField(values, besPriceIndex);
+    if (bes != null) row.besPrice = bes;
+    const tc = optionalField(values, totalCostIndex);
+    if (tc != null) row.totalCost = tc;
+    const tp = optionalField(values, tradedPriceIndex);
+    if (tp != null) row.tradedPrice = tp;
+    const mv = optionalField(values, marketValueIndex);
+    if (mv != null) row.marketValue = mv;
+    const hpmv = optionalField(values, holdingPctMvIndex);
+    if (hpmv != null) row.holdingPctMarketValue = hpmv;
+    if (unrealizedIndex >= 0) {
+      row.unrealizedGainLoss = parseNumber(values[unrealizedIndex] || '0');
+    }
+    if (unrealizedPctIndex >= 0) {
+      row.unrealizedGainLossPct = parseNumber(values[unrealizedPctIndex] || '0');
+    }
+    if (unrealizedTodayIndex >= 0) {
+      row.unrealizedTodayGainLoss = parseNumber(values[unrealizedTodayIndex] || '0');
+    }
+
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+/** Build adjustment map used by lot tracker / current snapshot. */
+export function portfolioRowsToAdjustments(
+  rows: PortfolioRow[]
+): Record<string, { salesCommission: number; salesProceeds: number; unrealizedGainLoss: number }> {
+  const portfolioData: Record<
+    string,
+    { salesCommission: number; salesProceeds: number; unrealizedGainLoss: number }
+  > = {};
+  for (const row of rows) {
+    if (row.salesCommission > 0 || row.salesProceeds > 0) {
+      portfolioData[row.security] = {
+        salesCommission: row.salesCommission,
+        salesProceeds: row.salesProceeds,
+        unrealizedGainLoss: row.unrealizedGainLoss ?? 0,
+      };
+    }
+  }
+  return portfolioData;
 }
 
 /**
@@ -230,73 +508,7 @@ export function parsePortfolioCSV(csvText: string): Record<string, {
   salesProceeds: number;
   unrealizedGainLoss: number;
 }> {
-  const lines = csvText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-  
-  if (lines.length < 3) {
-    throw new Error('Invalid Portfolio CSV format: Expected at least header and data rows');
-  }
-
-  // Find the header row
-  let headerIndex = -1;
-  for (let i = 0; i < Math.min(5, lines.length); i++) {
-    if (lines[i].includes('Security') && lines[i].includes('Sales Commission') && lines[i].includes('Sales Proceeds')) {
-      headerIndex = i;
-      break;
-    }
-  }
-
-  if (headerIndex === -1) {
-    throw new Error('Invalid Portfolio CSV format: Could not find header row');
-  }
-
-  const headerLine = lines[headerIndex];
-  const headers = parseCSVLine(headerLine);
-
-  // Find column indices
-  const securityIndex = headers.findIndex(h => h.toLowerCase().includes('security'));
-  const salesCommissionIndex = headers.findIndex(h => h.toLowerCase().includes('sales commission'));
-  const salesProceedsIndex = headers.findIndex(h => h.toLowerCase().includes('sales proceeds'));
-  const unrealizedGainLossIndex = headers.findIndex(h => 
-    h.toLowerCase().includes('unrealized gain') || h.toLowerCase().includes('unrealized gain / (loss)')
-  );
-
-  if (securityIndex === -1 || salesCommissionIndex === -1 || salesProceedsIndex === -1) {
-    throw new Error('Invalid Portfolio CSV format: Missing required columns');
-  }
-
-  const portfolioData: Record<string, {
-    salesCommission: number;
-    salesProceeds: number;
-    unrealizedGainLoss: number;
-  }> = {};
-
-  // Process data rows (skip "Total" row)
-  for (let i = headerIndex + 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line || line.trim().length === 0) continue;
-    if (line.toUpperCase().startsWith('TOTAL')) continue; // Skip total row
-
-    const values = parseCSVLine(line);
-    
-    if (values.length < Math.max(securityIndex, salesCommissionIndex, salesProceedsIndex) + 1) {
-      continue;
-    }
-
-    const security = values[securityIndex]?.trim();
-    const salesCommission = parseNumber(values[salesCommissionIndex] || '0');
-    const salesProceeds = parseNumber(values[salesProceedsIndex] || '0');
-    const unrealizedGainLoss = parseNumber(values[unrealizedGainLossIndex] || '0');
-
-    if (security && (salesCommission > 0 || salesProceeds > 0)) {
-      portfolioData[security] = {
-        salesCommission,
-        salesProceeds,
-        unrealizedGainLoss,
-      };
-    }
-  }
-
-  return portfolioData;
+  return portfolioRowsToAdjustments(parsePortfolioRows(csvText));
 }
 
 /**

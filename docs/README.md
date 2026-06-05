@@ -27,6 +27,7 @@ If you **copy this `docs/` folder** into a new or empty project and want to gene
 | Document | Description |
 |----------|-------------|
 | [AI-ANALYSIS-GUIDE.md](./AI-ANALYSIS-GUIDE.md) | **AI Portfolio Analysis** — How to export portfolio data, use AI agents for analysis, position categories, action price ranges |
+| [PORTFOLIO-BACKEND-IMPLEMENTATION.md](./PORTFOLIO-BACKEND-IMPLEMENTATION.md) | **Portfolio Postgres + API** — Docker, migrations, Express endpoints, Vite proxy, client sync, env vars, troubleshooting |
 | [Portfolio README](../src/features/portfolio/README.md) | Portfolio feature documentation — CSV import, lot tracking, AI export formats |
 
 ---
